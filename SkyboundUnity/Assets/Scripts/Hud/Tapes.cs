@@ -21,16 +21,14 @@ namespace Skybound
     /// </summary>
     public static class Tapes
     {
-        static readonly Color WHITE = Three.Hex("#eef3f8");
-        static readonly Color DIM = new Color(238 / 255f, 243 / 255f, 248 / 255f, 0.55f);
-        static readonly Color CYAN = Three.Hex("#4fd6ff");
-        static readonly Color BOX_BG = new Color(6 / 255f, 11 / 255f, 19 / 255f, 0.86f);
-        static readonly Color BACKING = new Color(6 / 255f, 10 / 255f, 18 / 255f, 0);
         const float D2R = Mathf.PI / 180;
+        const float COMMA_EM = 0.2f;
+        /// <summary>A tick's number closer to the pointer box than this would show through it.</summary>
+        const float BOX_CLEAR = 24;
+        const float BACKING_ALPHA = 0.55f;
+        const int HEADING_COLUMNS = 96;
         const float FADE = 0.16f;
         const int FADE_SLICES = 6;
-
-        static Color Rgba(int r, int g, int b, float a) => new Color(r / 255f, g / 255f, b / 255f, a);
 
         /// <summary>Opacity at a fraction along the tape: fades out toward the ends.</summary>
         public static float FadeAt(float t)
@@ -74,9 +72,8 @@ namespace Skybound
         /// <summary>Dark translucent backing that fades out toward the tape ends. It never changes, so it's drawn once on a layer of its own.</summary>
         public static void TapeBacking(Ctx c, float x, float w, float h)
         {
-            var mid = BACKING;
-            mid.a = 0.42f;
-            // The browser's own gradient: 0 → .42 by 18%, .42 until 82%, back to 0. The mask then fades it too.
+            var mid = WithAlpha(HudTheme.Backing, BACKING_ALPHA);
+            // Solid in the middle, out to nothing by 18% from each end. The mask then fades it too.
             var edge = h * 0.18f;
             for (var i = 0; i < FADE_SLICES; i++)
             {
@@ -102,6 +99,20 @@ namespace Skybound
         static void Text(Ctx c, string s, float x, float y, float size, Color color, TextAlign align = TextAlign.Center)
         {
             c.Text(s, x, y, size, color, align, Face.Display);
+        }
+
+        /// <summary>A number centred on x whose digits sit in cells of one width, so it doesn't jitter as it counts.</summary>
+        static void Tabular(Ctx c, string number, float x, float y, float size, Color color)
+        {
+            var width = 0f;
+            foreach (var ch in number) width += ch == ',' ? size * COMMA_EM : size * TabularLabel.DIGIT_EM;
+            var left = x - width / 2;
+            foreach (var ch in number)
+            {
+                var cell = ch == ',' ? size * COMMA_EM : size * TabularLabel.DIGIT_EM;
+                c.Text(NumberText.Char(ch), left + cell / 2, y, size, color, TextAlign.Center, Face.Display);
+                left += cell;
+            }
         }
 
         /// <summary>Pointer box: rectangle with an arrow toward the side, cyan outline.</summary>
@@ -130,9 +141,9 @@ namespace Skybound
                 c.LineTo(x + w, y + h / 2);
             }
             c.ClosePath();
-            c.FillStyle(BOX_BG);
+            c.FillStyle(HudTheme.Box);
             c.Fill();
-            c.StrokeStyle(CYAN);
+            c.StrokeStyle(HudTheme.Accent);
             c.lineWidth = 1.2f;
             c.Stroke();
         }
@@ -153,10 +164,10 @@ namespace Skybound
                 if (y1 > y0) FadedStrip(c, right - 4, 4, y0, y1, h, color);
             }
             // The low-speed band only means something in flight; on the runway it would just glare.
-            if (airborne) Band(-50, bands.stallKt, Rgba(255, 90, 79, 0.85f));
-            Band(bands.stallKt, bands.normalMaxKt, Rgba(79, 209, 139, 0.75f));
-            Band(bands.normalMaxKt, bands.vneKt, Rgba(242, 177, 61, 0.85f));
-            Band(bands.vneKt, 400, Rgba(255, 90, 79, 0.85f));
+            if (airborne) Band(-50, bands.stallKt, HudTheme.BandLow);
+            Band(bands.stallKt, bands.normalMaxKt, HudTheme.BandNormal);
+            Band(bands.normalMaxKt, bands.vneKt, HudTheme.BandHigh);
+            Band(bands.vneKt, 400, HudTheme.BandLow);
 
             var lo = Mathf.FloorToInt((ias - 40) / 5) * 5;
             for (var kt = Mathf.Max(0, lo); kt <= ias + 40; kt += 5)
@@ -164,20 +175,20 @@ namespace Skybound
                 var y = YOf(kt);
                 var t = y / h;
                 var major = kt % 10 == 0;
-                c.StrokeStyle(Faded(major ? WHITE : DIM, t));
+                c.StrokeStyle(Faded(major ? HudTheme.Ink : HudTheme.Dim, t));
                 c.lineWidth = 1.2f;
                 c.BeginPath();
                 c.MoveTo(right - 6 - (major ? 10 : 6), y);
                 c.LineTo(right - 6, y);
                 c.Stroke();
-                if (major) Text(c, NumberText.Whole(kt), right - 22, y, 15, Faded(WHITE, t), TextAlign.Right);
+                if (major && Mathf.Abs(y - h / 2) > BOX_CLEAR) Text(c, NumberText.Whole(kt), right - 22, y, 15, Faded(HudTheme.Ink, t), TextAlign.Right);
             }
 
             // Target-speed bug (Easy flight auto-throttle).
             if (targetKt.HasValue)
             {
                 var y = Mathf.Min(h - 8, Mathf.Max(8, YOf(targetKt.Value)));
-                c.FillStyle(Faded(CYAN, y / h));
+                c.FillStyle(Faded(HudTheme.Accent, y / h));
                 c.BeginPath();
                 c.MoveTo(right - 1, y);
                 c.LineTo(right + 8, y - 6);
@@ -187,7 +198,7 @@ namespace Skybound
             }
 
             PointerBox(c, 2, h / 2, tapeW - 16, 30, true);
-            Text(c, NumberText.Whole(Mathf.Max(0, Mathf.RoundToInt(ias))), 2 + (tapeW - 16) / 2, h / 2 + 1, 22, WHITE);
+            Tabular(c, NumberText.Whole(Mathf.Max(0, Mathf.RoundToInt(ias))), 2 + (tapeW - 16) / 2, h / 2 + 1, 22, HudTheme.Ink);
         }
 
         // ---------------------------------------------------------------- altitude
@@ -200,8 +211,8 @@ namespace Skybound
             var gy = YOf(groundFt);
             if (gy < h)
             {
-                FadedStrip(c, 0, 6, Mathf.Max(0, gy), h, h, Rgba(120, 84, 48, 0.45f));
-                c.StrokeStyle(Faded(Rgba(242, 177, 61, 0.9f), gy / h));
+                FadedStrip(c, 0, 6, Mathf.Max(0, gy), h, h, HudTheme.Ground);
+                c.StrokeStyle(Faded(HudTheme.BandHigh, gy / h));
                 c.lineWidth = 1.5f;
                 c.BeginPath();
                 c.MoveTo(0, gy);
@@ -216,18 +227,18 @@ namespace Skybound
                 var y = YOf(ft);
                 var t = y / h;
                 var major = ft % 100 == 0;
-                c.StrokeStyle(Faded(major ? WHITE : DIM, t));
+                c.StrokeStyle(Faded(major ? HudTheme.Ink : HudTheme.Dim, t));
                 c.lineWidth = 1.2f;
                 c.BeginPath();
                 c.MoveTo(8, y);
                 c.LineTo(8 + (major ? 12 : 6), y);
                 c.Stroke();
-                if (major) Text(c, NumberText.Thousands(ft), 26, y, 14, Faded(WHITE, t), TextAlign.Left);
+                if (major && Mathf.Abs(y - h / 2) > BOX_CLEAR) Text(c, NumberText.Thousands(ft), 26, y, 14, Faded(HudTheme.Ink, t), TextAlign.Left);
             }
 
             PointerBox(c, 12, h / 2, w - 14, 30, false);
             var shown = Mathf.RoundToInt(altFt / 10) * 10;
-            Text(c, NumberText.Thousands(shown), 12 + (w - 14) / 2, h / 2 + 1, 21, WHITE);
+            Tabular(c, NumberText.Thousands(shown), 12 + (w - 14) / 2, h / 2 + 1, 21, HudTheme.Ink);
         }
 
         // ---------------------------------------------------------------- vertical speed
@@ -242,12 +253,12 @@ namespace Skybound
         {
             var mid = h / 2;
             var half = h / 2 - 10;
-            c.FillStyle(Rgba(6, 10, 18, 0.35f));
+            c.FillStyle(WithAlpha(HudTheme.Backing, 0.35f));
             c.FillRect(0, 10, w, h - 20);
             foreach (var v in VSI_MARKS)
             {
                 var yy = mid - VsiPos(v) * half;
-                c.StrokeStyle(v == 0 ? WHITE : DIM);
+                c.StrokeStyle(v == 0 ? HudTheme.Ink : HudTheme.Dim);
                 c.lineWidth = v == 0 ? 1.5f : 1;
                 c.BeginPath();
                 c.MoveTo(w - (v == 0 ? 10 : 6), yy);
@@ -257,7 +268,7 @@ namespace Skybound
             if (targetFpm.HasValue)
             {
                 var ty = mid - VsiPos(targetFpm.Value) * half;
-                c.StrokeStyle(Rgba(79, 214, 255, 0.55f));
+                c.StrokeStyle(WithAlpha(HudTheme.Accent, 0.55f));
                 c.lineWidth = 2;
                 c.BeginPath();
                 c.MoveTo(0, ty);
@@ -265,7 +276,7 @@ namespace Skybound
                 c.Stroke();
             }
             var y = mid - VsiPos(fpm) * half;
-            c.StrokeStyle(CYAN);
+            c.StrokeStyle(HudTheme.Accent);
             c.lineWidth = 3;
             c.lineCap = LineCap.Round;
             c.BeginPath();
@@ -276,19 +287,18 @@ namespace Skybound
         }
 
         // ---------------------------------------------------------------- heading
-        /// <summary>The browser's vertical backing, faded left and right by its mask: columns, each its own gradient. Drawn once.</summary>
+        /// <summary>A vertical backing faded left and right: columns, each its own gradient. Dark enough at the top to read against a bright sky. Drawn once.</summary>
         public static void DrawHeadingBacking(Ctx c, float w, float h)
         {
-            const int COLUMNS = 24;
             var bottom = h - 6;
-            for (var i = 0; i < COLUMNS; i++)
+            for (var i = 0; i < HEADING_COLUMNS; i++)
             {
-                var x0 = w * i / COLUMNS;
-                var x1 = w * (i + 1) / COLUMNS;
+                var x0 = w * i / HEADING_COLUMNS;
+                var x1 = w * (i + 1) / HEADING_COLUMNS;
                 var fade = FadeAt((x0 + x1) / 2 / w);
-                c.FillLinear(WithAlpha(BACKING, 0), WithAlpha(BACKING, 0.45f * fade), x0, 0, x0, h);
+                c.FillLinear(WithAlpha(HudTheme.Backing, 0.35f * fade), WithAlpha(HudTheme.Backing, 0.6f * fade), x0, 0, x0, h);
                 c.FillRect(x0, 0, x1 - x0, h);
-                c.FillStyle(WithAlpha(Rgba(238, 243, 248, 0.25f), 0.25f * fade));
+                c.FillStyle(WithAlpha(HudTheme.Ink, 0.25f * fade));
                 c.FillRect(x0, bottom, x1 - x0, 1);
             }
         }
@@ -305,7 +315,7 @@ namespace Skybound
                 var t = x / w;
                 var deg = ((d % 360) + 360) % 360;
                 var major = deg % 10 == 0;
-                c.StrokeStyle(Faded(major ? WHITE : DIM, t));
+                c.StrokeStyle(Faded(major ? HudTheme.Ink : HudTheme.Dim, t));
                 c.lineWidth = 1.2f;
                 c.BeginPath();
                 c.MoveTo(x, bottom);
@@ -314,11 +324,11 @@ namespace Skybound
                 if (deg % 30 == 0)
                 {
                     var card = deg == 0 ? "N" : deg == 90 ? "E" : deg == 180 ? "S" : deg == 270 ? "W" : NumberText.TwoDigit(deg / 10);
-                    Text(c, card, x, bottom - 20, card.Length == 1 ? 16 : 14, Faded(card.Length == 1 ? CYAN : WHITE, t));
+                    Text(c, card, x, bottom - 20, card.Length == 1 ? 16 : 14, Faded(card.Length == 1 ? HudTheme.Accent : HudTheme.Ink, t));
                 }
             }
             // Lubber pointer.
-            c.FillStyle(CYAN);
+            c.FillStyle(HudTheme.Accent);
             c.BeginPath();
             c.MoveTo(w / 2, bottom + 2);
             c.LineTo(w / 2 - 5, h);
@@ -328,11 +338,6 @@ namespace Skybound
         }
 
         // ---------------------------------------------------------------- attitude ball
-        static readonly Color SKY_TOP = Three.Hex("#0f3a6b");
-        static readonly Color SKY_LOW = Three.Hex("#2f78c4");
-        static readonly Color EARTH_HIGH = Three.Hex("#6b4a2b");
-        static readonly Color EARTH_LOW = Three.Hex("#3a2716");
-
         public static void DrawAttitudeBall(Ctx c, float size, float pitchDeg, float rollDeg)
         {
             var r = size / 2 - 2;
@@ -343,13 +348,14 @@ namespace Skybound
             c.Rotate(-rollDeg * D2R);
             var pxPerDeg = r / 26;
             var hy = Mathf.Max(-r * 1.8f, Mathf.Min(r * 1.8f, pitchDeg * pxPerDeg));
-            c.FillLinear(SKY_TOP, SKY_LOW, 0, -r * 2, 0, hy);
+            // Flat colours: a Painter2D gradient allocates each time it's made, and this redraws every frame.
+            c.FillStyle(HudTheme.Sky);
             c.BeginPath();
             c.Arc(0, 0, r, 0, Mathf.PI * 2);
             c.Fill();
-            c.FillLinear(EARTH_HIGH, EARTH_LOW, 0, hy, 0, r * 2);
+            c.FillStyle(HudTheme.Earth);
             Gauges.FillBelowChord(c, r, hy);
-            c.StrokeStyle(WHITE);
+            c.StrokeStyle(HudTheme.Ink);
             c.lineWidth = 1.5f;
             Gauges.LineInCircle(c, r, hy, r * 2);
             c.lineWidth = 1;
@@ -357,7 +363,7 @@ namespace Skybound
             {
                 var y = hy - p * pxPerDeg;
                 var half = Math.Abs(p) == 10 ? r * 0.28f : r * 0.42f;
-                c.StrokeStyle(Rgba(238, 243, 248, 0.8f));
+                c.StrokeStyle(WithAlpha(HudTheme.Ink, 0.8f));
                 Gauges.LineInCircle(c, r, y, half);
             }
             c.Restore();
@@ -366,7 +372,7 @@ namespace Skybound
             {
                 var a = (-90 + b) * D2R;
                 var big = b == 0 || Math.Abs(b) == 30;
-                c.StrokeStyle(Rgba(238, 243, 248, 0.85f));
+                c.StrokeStyle(WithAlpha(HudTheme.Ink, 0.85f));
                 c.lineWidth = big ? 1.6f : 1;
                 c.BeginPath();
                 c.MoveTo(cx + Mathf.Cos(a) * (r - (big ? 9 : 6)), cy + Mathf.Sin(a) * (r - (big ? 9 : 6)));
@@ -376,7 +382,7 @@ namespace Skybound
             c.Save();
             c.Translate(cx, cy);
             c.Rotate(-rollDeg * D2R);
-            c.FillStyle(CYAN);
+            c.FillStyle(HudTheme.Accent);
             c.BeginPath();
             c.MoveTo(0, -r + 10);
             c.LineTo(-5, -r + 18);
@@ -385,7 +391,7 @@ namespace Skybound
             c.Fill();
             c.Restore();
             // Fixed aircraft symbol.
-            c.StrokeStyle(CYAN);
+            c.StrokeStyle(HudTheme.Accent);
             c.lineWidth = 2.6f;
             c.lineCap = LineCap.Round;
             c.BeginPath();
@@ -397,12 +403,12 @@ namespace Skybound
             c.LineTo(cx + r * 0.08f, cy + r * 0.08f);
             c.Stroke();
             c.lineCap = LineCap.Butt;
-            c.FillStyle(CYAN);
+            c.FillStyle(HudTheme.Accent);
             c.BeginPath();
             c.Arc(cx, cy, 2.2f, 0, Mathf.PI * 2);
             c.Fill();
             // Thin bezel.
-            c.StrokeStyle(Rgba(120, 190, 255, 0.35f));
+            c.StrokeStyle(HudTheme.Bezel);
             c.lineWidth = 1;
             c.BeginPath();
             c.Arc(cx, cy, r + 1, 0, Mathf.PI * 2);

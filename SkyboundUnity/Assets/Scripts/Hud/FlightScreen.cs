@@ -18,6 +18,7 @@ namespace Skybound
         readonly FlightSession session;
         readonly VisualElement root;
         readonly FlightHud hud;
+        readonly FlightSessionAdapter flightData;
         readonly VisualElement loading;
         readonly bool startImmediately;
         readonly double helpHidesAt;
@@ -42,7 +43,8 @@ namespace Skybound
             helpHidesAt = Time.unscaledTimeAsDouble + HELP_HIDES_AFTER_S;
             Perf.Reset();
 
-            hud = new FlightHud(root, app, this);
+            flightData = new FlightSessionAdapter(session);
+            hud = new FlightHud(root, app, this, flightData);
             hud.SetVisible(false);
             loading = LoadingOverlay();
             root.Add(loading);
@@ -67,6 +69,7 @@ namespace Skybound
             {
                 if (frames++ == 0 && !startImmediately) return;
                 UiStore.mountScene = true;
+                hud.Prepare();
                 if (startImmediately || frames > READY_AFTER_FRAMES) BecomeReady();
                 else return;
             }
@@ -83,6 +86,7 @@ namespace Skybound
                 helpTimerDone = true;
                 if (UiStore.showHelp) UiStore.ToggleHelp();
             }
+            flightData.Tick();
             hud.Frame();
             UpdateOverlays();
         }
@@ -119,12 +123,20 @@ namespace Skybound
             if (kb.vKey.wasPressedThisFrame) UiStore.ToggleView();
             if (kb.iKey.wasPressedThisFrame) UiStore.ToggleInstruments();
             if (kb.hKey.wasPressedThisFrame) UiStore.ToggleHelp();
+            if (kb.tabKey.wasPressedThisFrame) NextHudMode();
             if (kb.backspaceKey.wasPressedThisFrame)
             {
                 RestartOnRunway();
                 UiStore.SetPaused(false);
             }
             if (kb.rKey.wasPressedThisFrame) app.Link.Recenter();
+        }
+
+        void NextHudMode()
+        {
+            var next = (HudMode)(((int)SettingsStore.Get().hudMode + 1) % 3);
+            SettingsStore.SetHudMode(next);
+            session.Flash($"HUD {next.ToString().ToUpperInvariant()} · Tab to change", 1800);
         }
 
         void UpdateOverlays()
@@ -229,6 +241,7 @@ namespace Skybound
 
         public void Unmount()
         {
+            hud.Dispose();
             session.keyboard.holdFaster = session.keyboard.holdSlower = session.keyboard.holdBrake = false;
         }
     }

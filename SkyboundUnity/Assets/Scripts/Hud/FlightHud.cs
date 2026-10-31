@@ -1,14 +1,17 @@
 using System;
 using System.Globalization;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 
 namespace Skybound
 {
     /// <summary>
     /// Flight HUD, glass-cockpit style, arranged around the screen edges so the aircraft stays clear:
-    /// heading ribbon on top, airspeed tape left, altitude tape and vertical speed right, attitude
-    /// ball and throttle in the bottom corners. Everything is drawn from live telemetry once a frame.
+    /// heading ribbon on top, airspeed tape left, altitude tape and vertical speed right, minimap
+    /// bottom-left, attitude bottom-centre, throttle and systems bottom-right. Everything is drawn
+    /// once a frame from what IFlightDataProvider reports. Tab cycles Full, Minimal and Off; buttons
+    /// and status fade out when the mouse and keyboard have been left alone.
     /// </summary>
     public class FlightHud
     {
@@ -18,8 +21,9 @@ namespace Skybound
         const float ALT_W = 96;
         const float HDG_W = 435;
         const float HDG_H = 46;
-        const float BALL = 112;
+        const float BALL = 128;
         const float WARN_PULSE_S = 0.9f;
+        const float IDLE_AFTER_S = 6;
         /// <summary>Stands for "nothing to show" in a number that's otherwise never negative.</summary>
         const int NONE = -1;
         /// <summary>Keeps the manual-flying numbers apart from the Easy flight ones in one label.</summary>
@@ -30,7 +34,7 @@ namespace Skybound
             return (n >= 0 ? "+" : "−") + Math.Abs(n).ToString("F" + digits, CultureInfo.InvariantCulture);
         }
 
-        static string Thousands(double v) => v.ToString("N0", CultureInfo.InvariantCulture);
+        static string Thousands(int v) => v.ToString("N0", CultureInfo.InvariantCulture);
         static int Tenths(double v) => (int)Math.Round(v * 10);
         static string SignedTenths(int tenths) => Signed(tenths / 10.0, 1) + "°";
         static string Percent(string[] words, int v)
@@ -43,6 +47,7 @@ namespace Skybound
         readonly FlightScreen screen;
         readonly FlightSession session;
         readonly SensorHub hub;
+        readonly HudWarnings warnings = new HudWarnings();
         readonly Scope scope = new Scope();
         readonly VisualElement host;
 
@@ -55,8 +60,21 @@ namespace Skybound
         readonly CanvasElement vsiCanvas = NewCanvas(VSI_W, TAPE_H);
         readonly CanvasElement ballCanvas = NewCanvas(BALL, BALL);
 
-        readonly Label hdg, vs, agl, speedSet, pitch, roll, aoa, g, thr, thrMode, easy, fps, phase, brakes, warn, msg, source, cmdTurn, cmdClimb, crashReason;
-        readonly VisualElement sourceDot, cmd, thrFill, thrKnob, crash, tapesLeft, tapesRight, attitude, instruments, keyCard;
+        readonly TabularLabel hdg = new TabularLabel(17, "hud-hdg");
+        readonly TabularLabel vs = new TabularLabel(13, "hud-vs");
+        readonly TabularLabel agl = new TabularLabel(12, "hud-agl");
+        readonly TabularLabel pitch = new TabularLabel(13, "dd");
+        readonly TabularLabel roll = new TabularLabel(13, "dd");
+        readonly TabularLabel aoa = new TabularLabel(13, "dd");
+        readonly TabularLabel g = new TabularLabel(13, "dd");
+        readonly TabularLabel thr = new TabularLabel(30, "throttle__value");
+        readonly TabularLabel fuel = new TabularLabel(12);
+        readonly TabularLabel flaps = new TabularLabel(12);
+        readonly Label speedSet, thrMode, easy, fps, phase, brakes, warn, msg, source, cmdTurn, cmdClimb, crashReason, gearText;
+        readonly VisualElement sourceDot, cmd, thrFill, thrKnob, crash, heading, tapesLeft, tapesRight, attitude, instruments, keyCard;
+        readonly VisualElement topLeft, toolbar, minimapBox, systems, fuelRow, flapsRow, fuelFill, flapsFill;
+        readonly VisualElement[] gearDots = { Ui.Dot("ok"), Ui.Dot("ok"), Ui.Dot("ok") };
+        readonly Minimap minimap = new Minimap();
         readonly IconButton recenter, viewButton, instrumentsButton, helpButton;
         readonly Label keyCardTitle;
         readonly VisualElement keyRows;
@@ -67,12 +85,16 @@ namespace Skybound
         static readonly string[] TURN_WORDS = { "L", "R" };
         static readonly string[] CLIMB_WORDS = { "down", "up" };
 
-        readonly IntLabel hdgText, vsText, aglText, speedSetText, pitchText, rollText, aoaText, gText, thrText, thrModeText, fpsText, cmdTurnText, cmdClimbText;
-        string bandsFor = "";
-        SpeedBands bands = new SpeedBands { stallKt = 50, normalMaxKt = 115, vneKt = 163 };
+        readonly IntLabel hdgText, vsText, aglText, speedSetText, pitchText, rollText, aoaText, gText, thrText, thrModeText, fpsText, cmdTurnText, cmdClimbText, fuelText, flapsText;
+        bool idle;
+        float lastActivity;
 
         /// <summary>The whole HUD, for tests.</summary>
         public VisualElement Root => host;
+        public Minimap Map => minimap;
+        public HudWarning Warning => warnings.Current;
+        /// <summary>Where every number on the HUD comes from. Tests swap it for made-up flights.</summary>
+        public IFlightDataProvider Data { get; set; }
 
         static CanvasElement NewCanvas(float w, float h)
         {
@@ -90,16 +112,17 @@ namespace Skybound
             return backing;
         }
 
-        public FlightHud(VisualElement parent, App application, FlightScreen flightScreen)
+        public FlightHud(VisualElement parent, App application, FlightScreen flightScreen, IFlightDataProvider flightData)
         {
             app = application;
             screen = flightScreen;
             session = app.Session;
             hub = app.Link.hub;
+            Data = flightData;
 
-            host = Ui.Div("fill", "hud-text");
-            host.pickingMode = PickingMode.Ignore;
+            host = Ui.Div("fill", "hud-text", "hud-theme");
             parent.Add(host);
+            host.RegisterCallback<CustomStyleResolvedEvent>(_ => ApplyTheme());
 
             // ---------- top-left: controller and status ----------
             sourceDot = Ui.Div("dot");
@@ -111,23 +134,25 @@ namespace Skybound
             phase = Ui.Txt("", "display", "chip", "glass");
             brakes = Ui.Txt("BRAKES", "display", "chip", "chip--brakes");
             fps = Ui.Txt("", "num", "chip", "glass", "chip--fps");
-            host.Add(Ui.Div("hud-top-left").With(
+            topLeft = Ui.Div("hud-top-left", "hud-chrome").With(
                 Ui.Div("glass", "rounded-lg", "hud-source-pill").With(sourceDot, source),
                 cmd,
-                Ui.Div("chips").With(easy, phase, brakes, fps)).Appear());
+                Ui.Div("chips").With(easy, phase, brakes, fps));
+            host.Add(topLeft.Appear());
 
             // ---------- top-right: toolbar ----------
             recenter = new IconButton(Icon.Recenter, "Recenter controller", "R", () => app.Link.Recenter());
             viewButton = new IconButton(Icon.Camera, "Cockpit view", "V", UiStore.ToggleView);
             instrumentsButton = new IconButton(Icon.Gauge, "Instruments", "I", UiStore.ToggleInstruments);
             helpButton = new IconButton(Icon.Help, "Controls", "H", UiStore.ToggleHelp);
-            host.Add(Ui.Div("hud-toolbar").With(
+            toolbar = Ui.Div("hud-toolbar", "hud-chrome").With(
                 recenter,
                 viewButton,
                 instrumentsButton,
                 helpButton,
                 new IconButton(Icon.Settings, "Settings", null, () => UiStore.SetShowSettings(true)),
-                new IconButton(Icon.Pause, "Pause", "Esc", () => UiStore.SetPaused(true))).Appear());
+                new IconButton(Icon.Pause, "Pause", "Esc", () => UiStore.SetPaused(true)));
+            host.Add(toolbar.Appear());
 
             // Key card: left of the altitude tape so it never covers the instruments
             keyCardTitle = Ui.Txt("", "label");
@@ -140,45 +165,41 @@ namespace Skybound
             host.Add(keyCard);
 
             // ---------- top-centre: heading, warnings, messages ----------
-            hdg = Ui.Txt("", "num", "hud-hdg");
             warn = Ui.Txt("", "display", "hud-warn");
             msg = Ui.Txt("", "glass", "rounded-lg", "hud-msg");
-            host.Add(Ui.Div("hud-top-centre").With(Layered(hdgBacking, hdgCanvas), hdg, warn, msg));
-            Tapes.DrawHeadingBacking(hdgBacking.Begin(), HDG_W, HDG_H);
-            hdgBacking.End();
+            heading = Ui.Div("hud-heading", "hud-instrument").With(Layered(hdgBacking, hdgCanvas), hdg);
+            host.Add(Ui.Div("hud-top-centre").With(heading, warn, msg));
+            warnings.Changed += ShowWarning;
 
             // ---------- left edge: airspeed tape ----------
             speedSet = Ui.Txt("", "num", "hud-speed-set");
-            tapesLeft = Ui.Div("hud-tape-left").With(Ui.Txt("IAS · KT", "label", "tape-title"), Layered(speedBacking, speedCanvas), speedSet);
-            Tapes.TapeBacking(speedBacking.Begin(), 0, SPEED_W - 10, TAPE_H);
-            speedBacking.End();
+            tapesLeft = Ui.Div("hud-tape-left", "hud-instrument").With(Ui.Txt("IAS · KT", "label", "tape-title"), Layered(speedBacking, speedCanvas), speedSet);
             host.Add(tapesLeft);
 
             // ---------- right edge: altitude tape + vertical speed ----------
-            vs = Ui.Txt("", "num", "hud-vs");
-            agl = Ui.Txt("", "num", "hud-agl");
-            tapesRight = Ui.Div("hud-tape-right").With(
+            tapesRight = Ui.Div("hud-tape-right", "hud-instrument").With(
                 Ui.Txt("ALT · FT", "label", "tape-title"),
                 Ui.Div("tape-pair").With(vsiCanvas, Layered(altBacking, altCanvas)),
                 Ui.Div("hud-vs-row").With(Ui.Txt("VS", "num", "ink-3"), vs),
-                agl);
+                Ui.Div("hud-agl-row").With(agl, Ui.Txt("AGL", "num")));
             host.Add(tapesRight);
-            Tapes.TapeBacking(altBacking.Begin(), 0, ALT_W, TAPE_H);
-            altBacking.End();
 
-            // ---------- bottom-left: attitude ----------
-            pitch = Ui.Txt("", "num", "dd");
-            roll = Ui.Txt("", "num", "dd");
-            aoa = Ui.Txt("", "num", "dd", "ink-2");
-            g = Ui.Txt("", "num", "dd", "ink-2");
-            attitude = Ui.Div("hud-attitude").With(ballCanvas, Ui.Div("hud-attitude__table").With(
-                Ui.Div("row-between").With(Ui.Txt("PITCH", "num", "ink-3"), pitch),
-                Ui.Div("row-between").With(Ui.Txt("BANK", "num", "ink-3"), roll),
-                Ui.Div("row-between").With(Ui.Txt("AOA", "num", "ink-3"), aoa),
-                Ui.Div("row-between").With(Ui.Txt("G", "num", "ink-3"), g))).Appear();
-            host.Add(attitude);
+            // ---------- bottom-left: minimap ----------
+            minimapBox = Ui.Div("hud-minimap", "hud-instrument").With(minimap);
+            host.Add(minimapBox.Appear());
 
-            // ---------- bottom-centre: optional instrument panel ----------
+            // ---------- bottom-centre: attitude ----------
+            attitude = Ui.Div("hud-attitude", "hud-instrument").With(
+                Ui.Div("glass", "rounded-lg", "hud-attitude__table").With(
+                    Ui.Div("row-between").With(Ui.Txt("PITCH", "num", "ink-2"), pitch),
+                    Ui.Div("row-between").With(Ui.Txt("BANK", "num", "ink-2"), roll)),
+                ballCanvas,
+                Ui.Div("glass", "rounded-lg", "hud-attitude__table").With(
+                    Ui.Div("row-between").With(Ui.Txt("AOA", "num", "ink-2"), aoa),
+                    Ui.Div("row-between").With(Ui.Txt("G", "num", "ink-2"), g)));
+            host.Add(attitude.Appear());
+
+            // ---------- bottom-centre: optional instrument panel, in the attitude ball's place ----------
             // The cockpit's instrument texture shown on screen in the chase view: the same texture
             // the 3D panel uses, so the two can never disagree.
             var overlay = Ui.Div("hud-instrument-image");
@@ -189,10 +210,20 @@ namespace Skybound
             // ---------- bottom-right: throttle ----------
             thrFill = Ui.Div("throttle__fill");
             thrKnob = Ui.Div("throttle__knob");
-            thr = Ui.Txt("0", "num", "throttle__value");
             thrMode = Ui.Txt("", "num", "throttle__mode");
+            fuelFill = Ui.Div("sys-bar__fill");
+            flapsFill = Ui.Div("sys-bar__fill");
+            gearText = Ui.Txt("", "num", "ink-2");
+            fuelRow = SystemRow("FUEL", fuel, fuelFill);
+            flapsRow = SystemRow("FLAPS", flaps, flapsFill);
+            systems = Ui.Div("hud-systems").With(
+                fuelRow,
+                flapsRow,
+                Ui.Div("sys-row").With(Ui.Div("row-between").With(
+                    Ui.Txt("GEAR", "label", "sys-title"),
+                    Ui.Div("sys-gear").With(gearText, gearDots[0], gearDots[1], gearDots[2]))));
             var kb = session.keyboard;
-            host.Add(Ui.Div("glass", "rounded-xl", "hud-throttle").With(
+            host.Add(Ui.Div("glass", "rounded-xl", "hud-throttle", "hud-instrument").With(
                 Ui.Div("throttle__keys").With(
                     HoldKey(new IconEl(Icon.Plus, 16, Ui.INK_2), "Faster / more throttle (hold)", on => kb.holdFaster = on),
                     HoldKey(new IconEl(Icon.Minus, 16, Ui.INK_2), "Slower / less throttle (hold)", on => kb.holdSlower = on),
@@ -201,7 +232,8 @@ namespace Skybound
                 Ui.Div("throttle__text").With(
                     Ui.Txt("THROTTLE", "label", "tape-title"),
                     Ui.Div("throttle__number").With(thr, Ui.Txt("%", "num", "ink-3", "throttle__percent")),
-                    thrMode)).Appear());
+                    thrMode),
+                systems).Appear());
 
             // ---------- crash ----------
             crashReason = Ui.Txt("", "crash__reason");
@@ -218,7 +250,7 @@ namespace Skybound
 
             hdgText = new IntLabel(hdg, v => v.ToString("000") + "°");
             vsText = new IntLabel(vs, v => Signed(v));
-            aglText = new IntLabel(agl, v => $"{Thousands(v)} AGL");
+            aglText = new IntLabel(agl, Thousands);
             speedSetText = new IntLabel(speedSet, v => v >= MANUAL ? $"GS {v - MANUAL}" : v == NONE ? "IDLE" : $"SET {v}");
             pitchText = new IntLabel(pitch, SignedTenths);
             rollText = new IntLabel(roll, SignedTenths);
@@ -230,21 +262,36 @@ namespace Skybound
             fpsText = new IntLabel(fps, v => v > 0 ? $"{v} FPS" : "– FPS");
             cmdTurnText = new IntLabel(cmdTurn, v => Percent(TURN_WORDS, v));
             cmdClimbText = new IntLabel(cmdClimb, v => Percent(CLIMB_WORDS, v));
+            fuelText = new IntLabel(fuel, v => v + "%");
+            flapsText = new IntLabel(flaps, v => v + "%");
+
+            IgnorePointerExceptOnControls(host);
+            lastActivity = Time.unscaledTime;
+            UiStore.PausedChanged += OnPausedChanged;
 
             // Coarse state: what the browser's React re-render decides.
             scope.Show(recenter, () => session.pilotInfo.source == ControlSource.Motion);
             scope.On(() =>
             {
                 var cockpit = UiStore.view == CameraView.Cockpit;
+                var mode = SettingsStore.Get().hudMode;
+                var full = mode == HudMode.Full;
+                var on = mode != HudMode.Off;
                 viewButton.Active = cockpit;
                 viewButton.tooltip = cockpit ? "Chase view (V)" : "Cockpit view (V)";
                 instrumentsButton.Active = UiStore.showInstruments;
                 helpButton.Active = UiStore.showHelp;
-                Ui.SetShown(keyCard, UiStore.showHelp);
-                Ui.SetShown(tapesLeft, !cockpit);
-                Ui.SetShown(tapesRight, !cockpit);
-                Ui.SetShown(attitude, !cockpit);
-                Ui.SetShown(instruments, UiStore.showInstruments && !cockpit);
+                Ui.SetShown(keyCard, UiStore.showHelp && on);
+                Ui.SetShown(topLeft, full);
+                Ui.SetShown(toolbar, on);
+                Ui.SetShown(heading, on);
+                Ui.SetShown(tapesLeft, !cockpit && on);
+                Ui.SetShown(tapesRight, !cockpit && on);
+                Ui.SetShown(minimapBox, full);
+                Ui.SetShown(systems.parent, full);
+                Ui.SetShown(attitude, !cockpit && full && !UiStore.showInstruments);
+                Ui.SetShown(instruments, UiStore.showInstruments && !cockpit && full);
+                Ui.SetShown(warn, warnings.Current != HudWarning.None && on);
                 var isEasy = SettingsStore.Get().easyFlight;
                 if (!keyCardBuilt || keyCardEasy != isEasy) BuildKeyCard(isEasy);
             });
@@ -271,6 +318,64 @@ namespace Skybound
             return button;
         }
 
+        /// <summary>A named bar with its percentage, for fuel and flaps.</summary>
+        static VisualElement SystemRow(string title, TabularLabel value, VisualElement fill)
+        {
+            return Ui.Div("sys-row").With(
+                Ui.Div("row-between").With(Ui.Txt(title, "label", "sys-title"), Ui.Div("sys-value").With(value)),
+                Ui.Div("sys-bar").With(fill));
+        }
+
+        /// <summary>Only what can be clicked takes part in picking, and the crash card blocks what's behind it.</summary>
+        void IgnorePointerExceptOnControls(VisualElement el)
+        {
+            if (el == crash || el is IconButton || el.ClassListContains("hold-key")) return;
+            el.pickingMode = PickingMode.Ignore;
+            foreach (var child in el.Children()) IgnorePointerExceptOnControls(child);
+        }
+
+        void ApplyTheme()
+        {
+            if (!HudTheme.Apply(host.customStyle)) Debug.LogWarning("[Skybound] A HUD colour is missing from the .hud-theme rule in Skybound.uss");
+            DrawBackings();
+            minimap.DrawFixedParts();
+        }
+
+        /// <summary>These never change while flying, so they're drawn when the theme arrives and left alone.</summary>
+        void DrawBackings()
+        {
+            Tapes.DrawHeadingBacking(hdgBacking.Begin(), HDG_W, HDG_H);
+            hdgBacking.End();
+            Tapes.TapeBacking(speedBacking.Begin(), 0, SPEED_W - 10, TAPE_H);
+            speedBacking.End();
+            Tapes.TapeBacking(altBacking.Begin(), 0, ALT_W, TAPE_H);
+            altBacking.End();
+        }
+
+        void ShowWarning(HudWarning warning)
+        {
+            lastActivity = Time.unscaledTime;
+            Ui.SetText(warn, HudWarnings.Text(warning));
+            warn.EnableInClassList("hud-warn--caution", HudWarnings.IsCaution(warning));
+        }
+
+        void OnPausedChanged(bool paused) => lastActivity = Time.unscaledTime;
+
+        /// <summary>Tilting the controller is flying, not using the screen, so only the mouse and keyboard wake the buttons.</summary>
+        void UpdateIdle()
+        {
+            var mouse = Mouse.current;
+            var keys = Keyboard.current;
+            var active = UiStore.paused || warnings.Current != HudWarning.None
+                || mouse != null && (mouse.delta.ReadValue() != Vector2.zero || mouse.leftButton.isPressed)
+                || keys != null && keys.anyKey.isPressed;
+            if (active) lastActivity = Time.unscaledTime;
+            var nowIdle = Time.unscaledTime - lastActivity > IDLE_AFTER_S;
+            if (nowIdle == idle) return;
+            idle = nowIdle;
+            host.EnableInClassList("hud--idle", idle);
+        }
+
         void BuildKeyCard(bool isEasy)
         {
             keyCardBuilt = true;
@@ -289,6 +394,7 @@ namespace Skybound
                     ("Tilt sideways · Q E", "Steer on the ground"),
                     ("B", "Brakes"),
                     ("V · I", "Cockpit · instruments"),
+                    ("Tab", "HUD full · minimal · off"),
                     ("R", "Recenter controller"),
                     ("Esc · P", "Pause"),
                     ("Backspace", "Restart on runway"),
@@ -302,6 +408,7 @@ namespace Skybound
                     ("[ ]", "Trim"),
                     ("B", "Brakes"),
                     ("V · I", "Cockpit · instruments"),
+                    ("Tab", "HUD full · minimal · off"),
                     ("R", "Recenter controller"),
                     ("Esc · P", "Pause"),
                     ("Backspace", "Restart on runway"),
@@ -312,69 +419,89 @@ namespace Skybound
 
         void Loop()
         {
-            var flight = session.flight;
-            var t = flight.telemetry;
+            var d = Data;
             var s = SettingsStore.Get();
             var info = session.pilotInfo;
 
-            if (bandsFor != flight.ac.id)
-            {
-                bandsFor = flight.ac.id;
-                bands = new SpeedBands { stallKt = (float)FlightModel.StallSpeedKt(flight.ac), normalMaxKt = (float)flight.ac.easy.maxKt, vneKt = (float)(flight.ac.vneMs * 1.9438) };
-            }
-            double? target = s.easyFlight && session.easy.speedTargetKt > 0 ? session.easy.speedTargetKt : (double?)null;
-            var cockpit = UiStore.view == CameraView.Cockpit;
-            var airborne = t.phase == FlightPhase.Airborne;
+            warnings.Update(d);
+            UpdateIdle();
 
-            var c = hdgCanvas.Begin();
-            Tapes.DrawHeadingTape(c, HDG_W, HDG_H, (float)t.headingDeg);
-            hdgCanvas.End();
-            if (!cockpit)
+            float? target = s.easyFlight && d.TargetSpeedKt > 0 ? d.TargetSpeedKt : (float?)null;
+            var cockpit = UiStore.view == CameraView.Cockpit;
+            var airborne = d.Phase == FlightPhase.Airborne;
+            var full = s.hudMode == HudMode.Full;
+            var hudOn = s.hudMode != HudMode.Off;
+
+            if (hudOn)
             {
-                c = speedCanvas.Begin();
-                Tapes.DrawSpeedTape(c, SPEED_W, TAPE_H, (float)t.airspeedKt, (float?)target, bands, airborne);
+                var c = hdgCanvas.Begin();
+                Tapes.DrawHeadingTape(c, HDG_W, HDG_H, d.HeadingDeg);
+                hdgCanvas.End();
+            }
+            if (hudOn && !cockpit)
+            {
+                var c = speedCanvas.Begin();
+                Tapes.DrawSpeedTape(c, SPEED_W, TAPE_H, d.AirspeedKt, target, d.Bands, airborne);
                 speedCanvas.End();
                 c = altCanvas.Begin();
-                Tapes.DrawAltitudeTape(c, ALT_W, TAPE_H, (float)t.altitudeFt, (float)(t.altitudeFt - t.aglFt));
+                Tapes.DrawAltitudeTape(c, ALT_W, TAPE_H, d.AltitudeFt, d.AltitudeFt - d.AglFt);
                 altCanvas.End();
                 c = vsiCanvas.Begin();
-                Tapes.DrawVsi(c, VSI_W, TAPE_H, (float)t.verticalSpeedFpm, s.easyFlight && airborne ? (float)info.targetVsFpm : (float?)null);
+                Tapes.DrawVsi(c, VSI_W, TAPE_H, d.VerticalSpeedFpm, s.easyFlight && airborne ? d.TargetVsFpm : (float?)null);
                 vsiCanvas.End();
-                c = ballCanvas.Begin();
-                Tapes.DrawAttitudeBall(c, BALL, (float)t.pitchDeg, (float)t.rollDeg);
+            }
+            if (full && !cockpit && !UiStore.showInstruments)
+            {
+                var c = ballCanvas.Begin();
+                Tapes.DrawAttitudeBall(c, BALL, d.PitchDeg, d.RollDeg);
                 ballCanvas.End();
             }
+            if (full) minimap.Frame(d.NorthM, d.EastM, d.HeadingDeg);
 
-            var heading = (int)Math.Round(t.headingDeg, MidpointRounding.AwayFromZero) % 360;
-            hdgText.Set(heading == 0 ? 360 : heading);
-            vsText.Set((int)Math.Round(t.verticalSpeedFpm / 10) * 10);
-            aglText.Set((int)Math.Max(0, Math.Round(t.aglFt)));
-            var targetKt = target.HasValue ? (int)Math.Round(target.Value) : NONE;
-            speedSetText.Set(target.HasValue ? targetKt : s.easyFlight ? NONE : MANUAL + (int)Math.Round(t.groundSpeedKt));
-            pitchText.Set(Tenths(t.pitchDeg));
-            rollText.Set(Tenths(t.rollDeg));
-            aoaText.Set(Tenths(t.aoaDeg));
-            gText.Set((int)Math.Round(t.loadFactor * 100));
+            var headingDeg = (int)Math.Round((double)d.HeadingDeg, MidpointRounding.AwayFromZero) % 360;
+            hdgText.Set(headingDeg == 0 ? 360 : headingDeg);
+            vsText.Set((int)Math.Round(d.VerticalSpeedFpm / 10) * 10);
+            aglText.Set((int)Math.Max(0, Math.Round((double)d.AglFt)));
+            var targetKt = target.HasValue ? (int)Math.Round((double)target.Value) : NONE;
+            speedSetText.Set(target.HasValue ? targetKt : s.easyFlight ? NONE : MANUAL + (int)Math.Round((double)d.GroundSpeedKt));
+            pitchText.Set(Tenths(d.PitchDeg));
+            rollText.Set(Tenths(d.RollDeg));
+            aoaText.Set(Tenths(d.AoaDeg));
+            gText.Set((int)Math.Round(d.LoadFactor * 100.0));
 
             // Throttle lever: fill = engine power actually produced, knob = commanded throttle.
-            thrText.Set((int)Math.Round(t.throttle * 100));
-            thrFill.style.scale = new Scale(new Vector3(1, (float)t.engine, 1));
-            thrKnob.style.bottom = Length.Percent((float)t.throttle * 100);
-            thrModeText.Set(s.easyFlight ? targetKt : MANUAL + (int)Math.Round(t.trim * 100));
+            thrText.Set((int)Math.Round(d.Throttle * 100.0));
+            thrFill.style.scale = new Scale(new Vector3(1, d.EnginePower, 1));
+            thrKnob.style.bottom = Length.Percent(d.Throttle * 100);
+            thrModeText.Set(s.easyFlight ? targetKt : MANUAL + (int)Math.Round(d.Trim * 100.0));
+
+            Ui.SetShown(fuelRow, d.HasFuel);
+            if (d.HasFuel)
+            {
+                fuelText.Set(Mathf.CeilToInt(d.Fuel * 100));
+                fuelFill.style.scale = new Scale(new Vector3(d.Fuel, 1, 1));
+                fuelFill.EnableInClassList("sys-bar__fill--low", d.Fuel <= HudWarnings.LOW_FUEL);
+            }
+            Ui.SetShown(flapsRow, d.HasFlaps);
+            if (d.HasFlaps)
+            {
+                flapsText.Set(Mathf.RoundToInt(d.Flaps * 100));
+                flapsFill.style.scale = new Scale(new Vector3(d.Flaps, 1, 1));
+            }
+            Ui.SetText(gearText, d.HasRetractableGear ? (d.GearDown ? "DOWN" : "UP") : "FIXED");
+            foreach (var dot in gearDots)
+            {
+                dot.EnableInClassList("dot--ok", d.GearDown);
+                dot.EnableInClassList("dot--idle", !d.GearDown);
+            }
 
             Ui.SetShown(easy, s.easyFlight);
             Ui.SetShown(fps, s.showFps);
             if (s.showFps) fpsText.Set((int)Math.Round(Perf.fps));
-            Ui.SetShown(phase, t.phase != FlightPhase.Crashed);
-            Ui.SetText(phase, t.phase == FlightPhase.Ground ? "ON GROUND" : "AIRBORNE");
-            Ui.SetShown(brakes, t.brake > 0 && t.phase == FlightPhase.Ground);
-            var warning = t.stalled ? "STALL" : t.overspeed ? "OVERSPEED" : t.tailStrike ? "TAIL STRIKE" : null;
-            Ui.SetShown(warn, warning != null);
-            if (warning != null)
-            {
-                Ui.SetText(warn, warning);
-                warn.style.opacity = 0.775f + 0.225f * Mathf.Cos(Time.unscaledTime * 2 * Mathf.PI / WARN_PULSE_S);
-            }
+            Ui.SetShown(phase, d.Phase != FlightPhase.Crashed);
+            Ui.SetText(phase, d.Phase == FlightPhase.Ground ? "ON GROUND" : "AIRBORNE");
+            Ui.SetShown(brakes, d.Brake > 0 && d.Phase == FlightPhase.Ground);
+            if (warnings.Current != HudWarning.None) warn.style.opacity = 0.775f + 0.225f * Mathf.Cos(Time.unscaledTime * 2 * Mathf.PI / WARN_PULSE_S);
 
             var motion = info.source == ControlSource.Motion;
             // Name the real source: the simulator and the ESP32 must never look alike.
@@ -393,8 +520,8 @@ namespace Skybound
             var showMessage = Time.unscaledTimeAsDouble < info.messageUntil;
             Ui.SetShown(msg, showMessage);
             if (showMessage) Ui.SetText(msg, info.message);
-            Ui.SetShown(crash, t.phase == FlightPhase.Crashed);
-            Ui.SetText(crashReason, t.crashReason ?? "");
+            Ui.SetShown(crash, d.Phase == FlightPhase.Crashed);
+            Ui.SetText(crashReason, d.CrashReason ?? "");
         }
 
         /// <summary>A signed percentage that can't round to zero, since zero means "level" on the HUD.</summary>
@@ -407,5 +534,13 @@ namespace Skybound
         public void Frame() => scope.Frame();
 
         public void SetVisible(bool visible) => Ui.SetShown(host, visible);
+
+        /// <summary>Heavy one-time work, done while the loading screen is up.</summary>
+        public void Prepare() => minimap.Prepare();
+
+        public void Dispose()
+        {
+            UiStore.PausedChanged -= OnPausedChanged;
+        }
     }
 }

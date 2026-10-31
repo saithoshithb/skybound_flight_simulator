@@ -366,6 +366,7 @@ public class UiFlowTests
         yield return null;
         var panel = InstrumentPanel.Get();
         Assert.That(view.Parts.panelSurface.sharedMaterial.GetTexture("_BaseMap"), Is.EqualTo(panel.Texture));
+        UiStore.view = CameraView.Cockpit;
         var before = panel.version;
         yield return new WaitForSeconds(0.3f);
         Assert.That(panel.version, Is.GreaterThan(before));

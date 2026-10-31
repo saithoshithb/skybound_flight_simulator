@@ -4,6 +4,13 @@ using UnityEngine;
 
 namespace Skybound
 {
+    public enum HudMode
+    {
+        Full,
+        Minimal,
+        Off,
+    }
+
     /// <summary>What's saved. A new field keeps its default when an older file doesn't have it.</summary>
     [Serializable]
     public class SettingsState
@@ -29,6 +36,7 @@ namespace Skybound
         /// auto-rudder regardless of those toggles.
         /// </summary>
         public bool easyFlight = true;
+        public HudMode hudMode = HudMode.Full;
     }
 
     /// <summary>
@@ -120,6 +128,7 @@ namespace Skybound
         public static void SetAutoRudder(bool on) { Get().autoRudder = on; Changed(); }
         public static void SetBankAssist(bool on) { Get().bankAssist = on; Changed(); }
         public static void SetEasyFlight(bool on) { Get().easyFlight = on; Changed(); }
+        public static void SetHudMode(HudMode mode) { Get().hudMode = mode; Changed(); }
         public static void SetNeutral(Neutral n) { Get().neutral = n; Changed(); }
         public static void SetSource(TransportKind s) { Get().source = s; Changed(); }
         public static void SetLastPort(string port) { Get().lastPort = port; Changed(); }

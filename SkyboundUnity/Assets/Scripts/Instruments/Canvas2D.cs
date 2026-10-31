@@ -116,7 +116,7 @@ namespace Skybound
         }
 
         /// <summary>The two-colour gradient calls drop alpha, so anything translucent goes through a Gradient object.</summary>
-        static Gradient WithAlpha(Color from, Color to)
+        static Gradient TwoColours(Color from, Color to)
         {
             var g = new Gradient();
             g.SetKeys(
@@ -130,7 +130,7 @@ namespace Skybound
             hasGradient = true;
             gradient = from.a >= 1 && to.a >= 1
                 ? FillGradient.MakeLinearGradient(from, to, ToScreen(x0, y0), ToScreen(x1, y1), AddressMode.Clamp)
-                : FillGradient.MakeLinearGradient(WithAlpha(from, to), ToScreen(x0, y0), ToScreen(x1, y1), AddressMode.Clamp);
+                : FillGradient.MakeLinearGradient(TwoColours(from, to), ToScreen(x0, y0), ToScreen(x1, y1), AddressMode.Clamp);
         }
 
         public void FillRadial(Color from, Color to, float x, float y, float radius, float focusX, float focusY)
@@ -138,7 +138,7 @@ namespace Skybound
             hasGradient = true;
             gradient = from.a >= 1 && to.a >= 1
                 ? FillGradient.MakeRadialGradient(from, to, ToScreen(x, y), radius * unit, ToScreen(focusX, focusY), AddressMode.Clamp)
-                : FillGradient.MakeRadialGradient(WithAlpha(from, to), ToScreen(x, y), radius * unit, ToScreen(focusX, focusY), AddressMode.Clamp);
+                : FillGradient.MakeRadialGradient(TwoColours(from, to), ToScreen(x, y), radius * unit, ToScreen(focusX, focusY), AddressMode.Clamp);
         }
 
         public void StrokeStyle(Color color) => stroke = color;
@@ -259,7 +259,7 @@ namespace Skybound
         {
             public Label label;
             public string text;
-            public float size = -1, x = float.NaN, y = float.NaN, angle = float.NaN;
+            public float size = -1, x = float.NaN, y = float.NaN, angle = float.NaN, opacity = float.NaN;
             public Color color;
             public TextAlign align;
             public bool shown;
@@ -301,7 +301,7 @@ namespace Skybound
         {
             if (used == slots.Count)
             {
-                var label = new Label { pickingMode = PickingMode.Ignore };
+                var label = new Label { pickingMode = PickingMode.Ignore, usageHints = UsageHints.DynamicTransform | UsageHints.DynamicColor };
                 label.AddToClassList("canvas-text");
                 label.style.width = TEXT_BOX_WIDTH;
                 Add(label);
@@ -326,6 +326,13 @@ namespace Skybound
                 l.style.height = size * 1.5f;
                 slot.x = float.NaN;
             }
+            // Alpha goes through opacity: a colour change would remake the text's mesh, and the tapes fade every label each frame.
+            if (slot.opacity != color.a)
+            {
+                slot.opacity = color.a;
+                l.style.opacity = color.a;
+            }
+            color.a = 1;
             if (slot.color != color)
             {
                 slot.color = color;

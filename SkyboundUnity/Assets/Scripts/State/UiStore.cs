@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Skybound
@@ -25,11 +26,13 @@ namespace Skybound
         public static CameraView view = CameraView.Chase;
         public static bool showHelp = true;
         /// <summary>On-screen instrument panel in the chase view.</summary>
-        public static bool showInstruments = true;
+        public static bool showInstruments;
         /// <summary>Settings dialog, over the menu or the pause menu.</summary>
         public static bool showSettings;
         /// <summary>The 3D scene is wanted. Set a frame after the loading screen paints.</summary>
         public static bool mountScene;
+
+        public static event Action<bool> PausedChanged;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         public static void ResetAll()
@@ -39,7 +42,7 @@ namespace Skybound
             paused = false;
             view = CameraView.Chase;
             showHelp = true;
-            showInstruments = true;
+            showInstruments = false;
             showSettings = false;
             mountScene = false;
         }
@@ -47,7 +50,7 @@ namespace Skybound
         public static void SetScreen(AppScreen s)
         {
             screen = s;
-            paused = false;
+            SetPaused(false);
             showSettings = false;
         }
 
@@ -55,11 +58,17 @@ namespace Skybound
         {
             screen = AppScreen.Flight;
             start = startAt;
-            paused = false;
+            SetPaused(false);
             showSettings = false;
         }
 
-        public static void SetPaused(bool p) => paused = p;
+        public static void SetPaused(bool p)
+        {
+            if (paused == p) return;
+            paused = p;
+            PausedChanged?.Invoke(p);
+        }
+
         public static void ToggleView() => view = view == CameraView.Chase ? CameraView.Cockpit : CameraView.Chase;
         public static void ToggleHelp() => showHelp = !showHelp;
         public static void ToggleInstruments() => showInstruments = !showInstruments;
