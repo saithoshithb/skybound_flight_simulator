@@ -1,0 +1,140 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+@import '@fontsource/barlow-condensed/500.css';
+@import '@fontsource/barlow-condensed/600.css';
+
+/* Glass-cockpit aesthetic: deep navy and charcoal, white aviation type, one
+   cyan accent for "active / selected / target", electric blue for depth.
+   Green, amber and red are reserved for status, never decoration. */
+@theme {
+  --color-bg: #070b12;
+  --color-panel: #0d1420;
+  --color-panel-2: #131c2b;
+  --color-line: #1f2b3d;
+  --color-ink: #eef3f8;
+  --color-ink-2: #a7b4c4;
+  --color-ink-3: #66768a;
+  --color-accent: #4fd6ff;
+  --color-blue: #3d7bff;
+  --color-ok: #4fd18b;
+  --color-warn: #f2b13d;
+  --color-bad: #ff5a4f;
+  --font-sans: 'Inter Variable', 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-display: 'Barlow Condensed', 'Inter Variable', 'Segoe UI', sans-serif;
+  --font-mono: 'Barlow Condensed', 'Cascadia Mono', 'Consolas', ui-monospace, monospace;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Numbers read like an avionics display: condensed, tabular, slightly tracked. */
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  letter-spacing: 0.02em;
+}
+
+.label {
+  font-family: var(--font-display);
+  font-size: 11.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-ink-3);
+  font-weight: 600;
+}
+
+/* Glass surfaces. Kept subtle: low opacity, a thin cool border, soft blur. */
+.glass {
+  background: rgb(10 16 27 / 0.58);
+  border: 1px solid rgb(120 190 255 / 0.13);
+  backdrop-filter: blur(10px) saturate(1.15);
+  -webkit-backdrop-filter: blur(10px) saturate(1.15);
+  box-shadow: 0 8px 28px -12px rgb(0 0 0 / 0.55), inset 0 1px 0 rgb(255 255 255 / 0.04);
+}
+.glass-strong {
+  background: rgb(9 14 24 / 0.82);
+  border: 1px solid rgb(120 190 255 / 0.16);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  box-shadow: 0 24px 60px -20px rgb(0 0 0 / 0.7), inset 0 1px 0 rgb(255 255 255 / 0.05);
+}
+
+/* HUD text over a bright sky stays legible without a solid backing. */
+.hud-text {
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.65), 0 0 12px rgb(0 0 0 / 0.25);
+}
+
+/* ---- lightweight motion (transform/opacity only) ---- */
+@keyframes loading {
+  0% {
+    transform: translateX(-110%);
+  }
+  100% {
+    transform: translateX(320%);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(14px);
+  }
+}
+@keyframes warn-pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+.anim-fade {
+  animation: fade-in 0.22s ease-out both;
+}
+.anim-rise {
+  animation: rise-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.anim-scale {
+  animation: scale-in 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.anim-slide {
+  animation: slide-in-right 0.26s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.anim-pulse {
+  animation: warn-pulse 0.9s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

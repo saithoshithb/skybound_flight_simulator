@@ -1,0 +1,133 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f491a56a9553e5e4486872bf20a02d4b, type: 3}
+  m_Name: Sport
+  m_EditorClassIdentifier: Skybound::Skybound.AircraftDef
+  id: sport
+  displayName: Lowwing 200 sport
+  mass: 1100
+  inertia:
+    x: 1150
+    y: 1750
+    z: 2600
+  wingArea: 14.2
+  span: 9.4
+  chord: 1.52
+  oswald: 0.78
+  maxPowerW: 150000
+  propEfficiency: 0.8
+  staticThrustN: 3400
+  engineTimeConstantS: 0.6
+  CL0: 0.26
+  CLalpha: 5
+  CLq: 3.9
+  CLde: 0.43
+  CD0: 0.027
+  alphaStall: 0.3490658503988659
+  stallSharpness: 28
+  CYbeta: -0.31
+  CYdr: -0.187
+  Clbeta: -0.089
+  Clp: -0.42
+  Clr: 0.096
+  Clda: 0.23
+  Cldr: -0.0147
+  Cm0: -0.02
+  Cmalpha: -0.89
+  Cmq: -10.5
+  Cmde: -1.28
+  Cnbeta: 0.065
+  Cnp: -0.03
+  Cnr: -0.099
+  Cnda: -0.053
+  Cndr: 0.0657
+  maxElevator: 0.4363323129985824
+  maxAileron: 0.3839724354387525
+  maxRudder: 0.3490658503988659
+  surfaceLagS: 0.06
+  maxNoseSteer: 0.4363323129985824
+  gear:
+  - name: nose
+    pos:
+      x: 1.3
+      y: 0
+      z: 1.05
+    spring: 36000
+    damper: 4600
+    steerable: 1
+    brakes: 0
+    skid: 0
+  - name: left main
+    pos:
+      x: -0.3
+      y: -1.4
+      z: 1.05
+    spring: 58000
+    damper: 6800
+    steerable: 0
+    brakes: 1
+    skid: 0
+  - name: right main
+    pos:
+      x: -0.3
+      y: 1.4
+      z: 1.05
+    spring: 58000
+    damper: 6800
+    steerable: 0
+    brakes: 1
+    skid: 0
+  - name: tail
+    pos:
+      x: -5
+      y: 0
+      z: -0.1
+    spring: 90000
+    damper: 9000
+    steerable: 0
+    brakes: 0
+    skid: 1
+  structure:
+  - name: Left wingtip
+    pos:
+      x: -0.1
+      y: -4.7
+      z: 0.3
+  - name: Right wingtip
+    pos:
+      x: -0.1
+      y: 4.7
+      z: 0.3
+  - name: Propeller
+    pos:
+      x: 2.3
+      y: 0
+      z: 0.75
+  - name: Fuselage
+    pos:
+      x: 0
+      y: 0
+      z: 0.55
+  vneMs: 100
+  description: Faster two-seat sport plane. More power and a crisper roll; lands
+    faster.
+  look:
+    highWing: 0
+    body: '#e9e6df'
+    stripe: '#7b2f2a'
+    accent: '#2f3e4f'
+  easy:
+    cruiseKt: 120
+    takeoffKt: 110
+    minKt: 70
+    maxKt: 140
+    rotateKt: 66

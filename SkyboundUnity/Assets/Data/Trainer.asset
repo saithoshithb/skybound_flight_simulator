@@ -1,0 +1,132 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f491a56a9553e5e4486872bf20a02d4b, type: 3}
+  m_Name: Trainer
+  m_EditorClassIdentifier: Skybound::Skybound.AircraftDef
+  id: trainer
+  displayName: Highwing 160 trainer
+  mass: 1043
+  inertia:
+    x: 1285
+    y: 1825
+    z: 2667
+  wingArea: 16.2
+  span: 10.9
+  chord: 1.49
+  oswald: 0.75
+  maxPowerW: 119000
+  propEfficiency: 0.8
+  staticThrustN: 2600
+  engineTimeConstantS: 0.6
+  CL0: 0.31
+  CLalpha: 5.143
+  CLq: 3.9
+  CLde: 0.43
+  CD0: 0.031
+  alphaStall: 0.3490658503988659
+  stallSharpness: 28
+  CYbeta: -0.31
+  CYdr: -0.187
+  Clbeta: -0.089
+  Clp: -0.47
+  Clr: 0.096
+  Clda: 0.178
+  Cldr: -0.0147
+  Cm0: -0.015
+  Cmalpha: -0.89
+  Cmq: -12.4
+  Cmde: -1.28
+  Cnbeta: 0.065
+  Cnp: -0.03
+  Cnr: -0.099
+  Cnda: -0.053
+  Cndr: 0.0657
+  maxElevator: 0.4363323129985824
+  maxAileron: 0.3490658503988659
+  maxRudder: 0.3490658503988659
+  surfaceLagS: 0.06
+  maxNoseSteer: 0.4363323129985824
+  gear:
+  - name: nose
+    pos:
+      x: 1.25
+      y: 0
+      z: 1.05
+    spring: 35000
+    damper: 4500
+    steerable: 1
+    brakes: 0
+    skid: 0
+  - name: left main
+    pos:
+      x: -0.35
+      y: -1.25
+      z: 1.05
+    spring: 55000
+    damper: 6500
+    steerable: 0
+    brakes: 1
+    skid: 0
+  - name: right main
+    pos:
+      x: -0.35
+      y: 1.25
+      z: 1.05
+    spring: 55000
+    damper: 6500
+    steerable: 0
+    brakes: 1
+    skid: 0
+  - name: tail
+    pos:
+      x: -5.2
+      y: 0
+      z: -0.1
+    spring: 90000
+    damper: 9000
+    steerable: 0
+    brakes: 0
+    skid: 1
+  structure:
+  - name: Left wingtip
+    pos:
+      x: -0.2
+      y: -5.45
+      z: -1
+  - name: Right wingtip
+    pos:
+      x: -0.2
+      y: 5.45
+      z: -1
+  - name: Propeller
+    pos:
+      x: 2.3
+      y: 0
+      z: 0.75
+  - name: Fuselage
+    pos:
+      x: 0
+      y: 0
+      z: 0.55
+  vneMs: 84
+  description: Forgiving four-seat trainer. Stable, slow to stall, easy to land.
+  look:
+    highWing: 1
+    body: '#efede6'
+    stripe: '#24405a'
+    accent: '#a8412f'
+  easy:
+    cruiseKt: 95
+    takeoffKt: 90
+    minKt: 60
+    maxKt: 115
+    rotateKt: 55
