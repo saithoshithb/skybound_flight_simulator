@@ -38,3 +38,10 @@ describe('terrain', () => {
     expect(startAgl).toBeLessThan(m.telemetry.altitudeFt); // AGL below MSL over raised ground
   });
 });
+
+describe('past the drawn terrain', () => {
+  it('is flat, like the plain drawn there', () => {
+    for (const [n, e] of [[0, 16000], [0, 17000], [-17000, 3000], [20000, -20000]]) expect(terrainHeight(n, e)).toBe(0);
+    expect(terrainHeight(0, 12000)).toBeGreaterThan(0);
+  });
+});

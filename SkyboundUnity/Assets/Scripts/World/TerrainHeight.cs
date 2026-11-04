@@ -17,6 +17,9 @@ namespace Skybound
         public const double maxHillM = 380;
 
         const double RUNWAY_END_N = 1200;
+        /// <summary>Half the drawn terrain tile. Past it the world draws a flat plain, so the hills fade out before it.</summary>
+        const double TILE_EDGE_M = 16000;
+        const double EDGE_FADE_M = 2000;
 
         // JS wraps to 32 bits with `| 0`, Math.imul and `>>>`; int and uint do the same here.
         static double Hash(long ix, long iy)
@@ -76,6 +79,7 @@ namespace Skybound
             var mask = Smoothstep(flatRadiusM, flatRadiusM + rampM, DistToRunway(north, east));
             // Keep a wide, low corridor for the long final to runway 36 (south of the field).
             if (north < 0) mask *= 0.15 + 0.85 * Smoothstep(900, 2600, Math.Abs(east));
+            mask *= 1 - Smoothstep(TILE_EDGE_M - EDGE_FADE_M, TILE_EDGE_M, Math.Max(Math.Abs(north), Math.Abs(east)));
             if (mask == 0) return 0;
             var @base = Fbm(north / 4200 + 11.3, east / 4200 - 7.1);
             var ridges = 1 - Math.Abs(2 * Fbm(north / 2300 - 3.7, east / 2300 + 5.2) - 1);

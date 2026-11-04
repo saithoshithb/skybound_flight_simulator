@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware';
 import { ZERO_NEUTRAL, type Neutral } from '../calibration/neutral';
-import { DEFAULT_CONTROL_SETTINGS, PREVIOUS_SHAPING_DEFAULTS, type AxisSettings, type ControlSettings } from '../control/mapping';
+import { DEFAULT_CONTROL_SETTINGS, fitToRanges, PREVIOUS_SHAPING_DEFAULTS, type AxisSettings, type ControlSettings } from '../control/mapping';
 import type { TransportKind } from '../sensor/transport/types';
 
 export type GraphicsQuality = 'low' | 'medium' | 'high';
@@ -124,7 +124,7 @@ export const useSettings = create<SettingsState>()(
         return {
           ...current,
           ...p,
-          control: { ...DEFAULT_CONTROL_SETTINGS, ...p.control },
+          control: fitToRanges({ ...DEFAULT_CONTROL_SETTINGS, ...p.control }),
           neutral: { ...ZERO_NEUTRAL, ...p.neutral },
         };
       },

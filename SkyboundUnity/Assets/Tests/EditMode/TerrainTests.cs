@@ -23,6 +23,15 @@ public class TerrainTests
     }
 
     [Test]
+    public void IsFlatPastTheEdgeOfTheDrawnTerrain()
+    {
+        // Beyond 16 km the world draws a flat plain, so there must be nothing there to hit.
+        foreach (var (north, east) in new[] { (0.0, 16000.0), (0.0, 17000.0), (-17000.0, 3000.0), (20000.0, -20000.0) })
+            Assert.That(TerrainHeight.At(north, east), Is.EqualTo(0), $"{north}, {east}");
+        Assert.That(TerrainHeight.At(0, 12000), Is.GreaterThan(0), "hills well inside the tile are untouched");
+    }
+
+    [Test]
     public void IsFlatAroundTheAirfieldAndAlongTheFinalApproach()
     {
         for (var n = -200; n <= 1400; n += 100)

@@ -56,12 +56,16 @@ export const TERRAIN = {
   flatRadiusM: 1800,
   rampM: 3500,
   maxHillM: 380,
+  /** Half the drawn terrain tile. Past it the world draws a flat plain, so the hills fade out before it. */
+  tileEdgeM: 16000,
+  edgeFadeM: 2000,
 };
 
 export function terrainHeight(north: number, east: number) {
   let mask = smoothstep(TERRAIN.flatRadiusM, TERRAIN.flatRadiusM + TERRAIN.rampM, distToRunway(north, east));
   // Keep a wide, low corridor for the long final to runway 36 (south of the field).
   if (north < 0) mask *= 0.15 + 0.85 * smoothstep(900, 2600, Math.abs(east));
+  mask *= 1 - smoothstep(TERRAIN.tileEdgeM - TERRAIN.edgeFadeM, TERRAIN.tileEdgeM, Math.max(Math.abs(north), Math.abs(east)));
   if (mask === 0) return 0;
   const base = fbm(north / 4200 + 11.3, east / 4200 - 7.1);
   const ridges = 1 - Math.abs(2 * fbm(north / 2300 - 3.7, east / 2300 + 5.2) - 1);

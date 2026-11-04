@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { computeNeutral, ZERO_NEUTRAL } from '../calibration/neutral';
 import type { ImuSample } from '../sensor/protocol';
-import { applyDeadzone, ControlPipeline, DEFAULT_CONTROL_SETTINGS as S, shapeAxis } from './mapping';
+import { applyDeadzone, ControlPipeline, DEFAULT_CONTROL_SETTINGS as S, fitToRanges, shapeAxis } from './mapping';
 
 const sample = (p: Partial<ImuSample> = {}): ImuSample => ({
   kind: 'imu',
@@ -15,6 +15,18 @@ const sample = (p: Partial<ImuSample> = {}): ImuSample => ({
   yawRate: 0,
   accelG: 1,
   ...p,
+});
+
+describe('saved settings', () => {
+  it('are brought back inside the slider ranges', () => {
+    const c = fitToRanges({ ...S, sensitivity: 50, deadzone: Number.NaN, smoothingMs: -5, roll: { ...S.roll, maxAngleDeg: 0 } });
+    expect(c.roll.maxAngleDeg).toBe(10);
+    expect(c.sensitivity).toBe(2);
+    expect(c.deadzone).toBe(S.deadzone);
+    expect(c.smoothingMs).toBe(0);
+    // The case that went wrong: held exactly at neutral with a 0° max angle gave 0 / 0.
+    expect(shapeAxis(0, c.roll, c)).toBe(0);
+  });
 });
 
 describe('shaping', () => {

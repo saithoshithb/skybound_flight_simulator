@@ -47,6 +47,28 @@ export interface ControlSettings {
   slewPerSec: number;
 }
 
+const fit = (v: unknown, min: number, max: number, fallback: number) =>
+  typeof v === 'number' && !Number.isNaN(v) ? Math.min(max, Math.max(min, v)) : fallback;
+
+/** Saved settings can hold values the sliders never allow: a 0° max angle divides by zero. Same ranges as the sliders. */
+export function fitToRanges(c: ControlSettings): ControlSettings {
+  const d = DEFAULT_CONTROL_SETTINGS;
+  const axis = (a: AxisSettings | undefined, def: AxisSettings) => ({ ...def, ...a, maxAngleDeg: fit(a?.maxAngleDeg, 10, 70, def.maxAngleDeg) });
+  return {
+    ...c,
+    pitch: axis(c.pitch, d.pitch),
+    roll: axis(c.roll, d.roll),
+    yaw: axis(c.yaw, d.yaw),
+    yawFullRateDps: fit(c.yawFullRateDps, 20, 300, d.yawFullRateDps),
+    yawWashoutS: fit(c.yawWashoutS, 0.5, 10, d.yawWashoutS),
+    sensitivity: fit(c.sensitivity, 0.3, 2, d.sensitivity),
+    deadzone: fit(c.deadzone, 0, 0.3, d.deadzone),
+    expo: fit(c.expo, 0, 1, d.expo),
+    smoothingMs: fit(c.smoothingMs, 0, 250, d.smoothingMs),
+    slewPerSec: fit(c.slewPerSec, 1, 12, d.slewPerSec),
+  };
+}
+
 export const DEFAULT_CONTROL_SETTINGS: ControlSettings = {
   pitch: { maxAngleDeg: 30, invert: false },
   roll: { maxAngleDeg: 35, invert: false },
