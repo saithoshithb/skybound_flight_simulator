@@ -135,7 +135,8 @@ public class WorldReferenceTests
             AssertRow(t.x, v[1], $"tree {n} x");
             AssertRow(t.z, v[2], $"tree {n} z");
             AssertRow(t.h, v[3], $"tree {n} h");
-            AssertRow(t.ground, v[4], $"tree {n} ground");
+            // The browser's ground is its noise hills; ours is the Blender heightmap, so trees stand on that.
+            Assert.That(t.ground, Is.EqualTo(TerrainHeight.At(-t.z, t.x)), $"tree {n} ground");
             AssertRow(Math.Sin(t.turn / 2), v[5], $"tree {n} turn sine");
             AssertRow(Math.Cos(t.turn / 2), v[6], $"tree {n} turn cosine");
             Assert.That(t.color.r, Is.EqualTo(v[7]).Within(1e-6), $"tree {n} red");

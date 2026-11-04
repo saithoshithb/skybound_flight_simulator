@@ -1,12 +1,14 @@
 using System;
+using UnityEngine;
 
 namespace Skybound
 {
     /// <summary>
     /// Terrain height (metres above the field, ≥ 0) as a pure function of
     /// position. Shared by the renderer and the flight model, so hills you see are
-    /// hills you can hit. The airfield, its surroundings and the southern approach
-    /// to runway 36 are flat; rolling hills rise beyond them.
+    /// hills you can hit. The shape is a heightmap made in Blender (Tools/blender/terrain.py);
+    /// on top of it the airfield, its surroundings and the southern approach to runway 36
+    /// are kept flat, and the tile's edge fades out, whatever was sculpted there.
     ///
     /// Coordinates: north (m) and east (m) from the runway-36 threshold.
     /// </summary>
@@ -14,51 +16,45 @@ namespace Skybound
     {
         public const double flatRadiusM = 1800;
         public const double rampM = 3500;
-        public const double maxHillM = 380;
+        /// <summary>About the tallest peak: the minimap shades from the field up to here.</summary>
+        public const double maxHillM = 1500;
 
         const double RUNWAY_END_N = 1200;
         /// <summary>Half the drawn terrain tile. Past it the world draws a flat plain, so the hills fade out before it.</summary>
         const double TILE_EDGE_M = 16000;
         const double EDGE_FADE_M = 2000;
 
-        // JS wraps to 32 bits with `| 0`, Math.imul and `>>>`; int and uint do the same here.
-        static double Hash(long ix, long iy)
+        /// <summary>Heightmap: SIDE × SIDE 16-bit heights, rows south to north, columns west to east.</summary>
+        const int SIDE = 1025;
+        const double SPACING_M = 2 * TILE_EDGE_M / (SIDE - 1);
+        const double UNIT_M = 2000.0 / 65535;
+        static ushort[] heights;
+
+        static ushort[] Heights()
         {
-            unchecked
-            {
-                var h = (int)(ix * 374761393L + iy * 668265263L);
-                h = (h ^ (int)((uint)h >> 13)) * 1274126177;
-                return ((uint)h ^ ((uint)h >> 16)) / 4294967296.0;
-            }
+            if (heights != null) return heights;
+            var asset = Resources.Load<TextAsset>("Terrain/heightmap");
+            if (asset == null) throw new InvalidOperationException("Resources/Terrain/heightmap.bytes is missing: export it with Tools/blender/terrain.py");
+            var bytes = asset.bytes;
+            if (bytes.Length != SIDE * SIDE * 2) throw new InvalidOperationException($"The heightmap is {bytes.Length} bytes, not {SIDE * SIDE * 2}");
+            var loaded = new ushort[SIDE * SIDE];
+            Buffer.BlockCopy(bytes, 0, loaded, 0, bytes.Length); // little-endian, as written
+            return heights = loaded;
         }
 
-        static double ValueNoise(double x, double y)
+        /// <summary>Bilinear between the four nearest heightmap samples.</summary>
+        static double Sample(double north, double east)
         {
-            var ix = (long)Math.Floor(x);
-            var iy = (long)Math.Floor(y);
-            var fx = x - ix;
-            var fy = y - iy;
-            var sx = fx * fx * (3 - 2 * fx);
-            var sy = fy * fy * (3 - 2 * fy);
-            var a = Hash(ix, iy);
-            var b = Hash(ix + 1, iy);
-            var c = Hash(ix, iy + 1);
-            var d = Hash(ix + 1, iy + 1);
-            return a + (b - a) * sx + (c - a) * sy + (a - b - c + d) * sx * sy;
-        }
-
-        static double Fbm(double x, double y)
-        {
-            double sum = 0;
-            var amp = 0.5;
-            double freq = 1;
-            for (var o = 0; o < 5; o++)
-            {
-                sum += amp * ValueNoise(x * freq, y * freq);
-                freq *= 2.03;
-                amp *= 0.5;
-            }
-            return sum; // ≈ 0…1
+            var map = Heights();
+            var x = Math.Min(SIDE - 1.000001, Math.Max(0, (east + TILE_EDGE_M) / SPACING_M));
+            var y = Math.Min(SIDE - 1.000001, Math.Max(0, (north + TILE_EDGE_M) / SPACING_M));
+            var i = (int)x;
+            var j = (int)y;
+            var fx = x - i;
+            var fy = y - j;
+            var at = j * SIDE + i;
+            double a = map[at], b = map[at + 1], c = map[at + SIDE], d = map[at + SIDE + 1];
+            return (a + (b - a) * fx + (c - a) * fy + (a - b - c + d) * fx * fy) * UNIT_M;
         }
 
         static double Smoothstep(double a, double b, double x)
@@ -81,10 +77,7 @@ namespace Skybound
             if (north < 0) mask *= 0.15 + 0.85 * Smoothstep(900, 2600, Math.Abs(east));
             mask *= 1 - Smoothstep(TILE_EDGE_M - EDGE_FADE_M, TILE_EDGE_M, Math.Max(Math.Abs(north), Math.Abs(east)));
             if (mask == 0) return 0;
-            var @base = Fbm(north / 4200 + 11.3, east / 4200 - 7.1);
-            var ridges = 1 - Math.Abs(2 * Fbm(north / 2300 - 3.7, east / 2300 + 5.2) - 1);
-            var h = Math.Max(0, @base - 0.32) * 1.5 + ridges * ridges * 0.35;
-            return mask * h * maxHillM;
+            return mask * Sample(north, east);
         }
     }
 }

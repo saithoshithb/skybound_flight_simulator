@@ -1,0 +1,1843 @@
+{
+ "types": [
+  {
+   "name": "Control tower",
+   "solids": [
+    {
+     "x": 0,
+     "y": 0,
+     "w": 10.3,
+     "d": 8.3,
+     "t": 4.5
+    },
+    {
+     "x": 0,
+     "y": 0,
+     "w": 9.8,
+     "d": 9.8,
+     "t": 23.8
+    }
+   ]
+  },
+  {
+   "name": "Terminal",
+   "solids": [
+    {
+     "x": 0,
+     "y": 0,
+     "w": 40.4,
+     "d": 16.4,
+     "t": 9.6
+    },
+    {
+     "x": 0,
+     "y": -10.0,
+     "w": 12,
+     "d": 4,
+     "t": 3.8
+    }
+   ]
+  },
+  {
+   "name": "Hangar",
+   "solids": [
+    {
+     "x": 0,
+     "y": 0,
+     "w": 31.2,
+     "d": 37.2,
+     "t": 13.0
+    }
+   ]
+  },
+  {
+   "name": "Fuel station",
+   "solids": [
+    {
+     "x": 0,
+     "y": 4,
+     "w": 7,
+     "d": 7.5,
+     "t": 3.2
+    },
+    {
+     "x": 0,
+     "y": -3,
+     "w": 9.2,
+     "d": 5.2,
+     "t": 4.9
+    },
+    {
+     "x": 5.5,
+     "y": 0.5,
+     "w": 3.2,
+     "d": 3.2,
+     "t": 3.1
+    }
+   ]
+  },
+  {
+   "name": "House",
+   "solids": [
+    {
+     "x": 0,
+     "y": 0,
+     "w": 11.3,
+     "d": 9.3,
+     "t": 9.125
+    }
+   ]
+  },
+  {
+   "name": "Cottage",
+   "solids": [
+    {
+     "x": 0,
+     "y": 0,
+     "w": 10.2,
+     "d": 8.2,
+     "t": 7.087
+    }
+   ]
+  },
+  {
+   "name": "Townhouse",
+   "solids": [
+    {
+     "x": 0,
+     "y": 0,
+     "w": 6.6,
+     "d": 10.6,
+     "t": 10.4
+    }
+   ]
+  },
+  {
+   "name": "Shop",
+   "solids": [
+    {
+     "x": 0,
+     "y": 0,
+     "w": 8.4,
+     "d": 10.4,
+     "t": 8.2
+    }
+   ]
+  },
+  {
+   "name": "Cafe",
+   "solids": [
+    {
+     "x": 0,
+     "y": 0,
+     "w": 8.4,
+     "d": 10.4,
+     "t": 8.2
+    }
+   ]
+  },
+  {
+   "name": "Apartments",
+   "solids": [
+    {
+     "x": 0,
+     "y": 0,
+     "w": 24.4,
+     "d": 12.4,
+     "t": 13.8
+    },
+    {
+     "x": 7,
+     "y": 0,
+     "w": 4,
+     "d": 4,
+     "t": 15.5
+    },
+    {
+     "x": 0,
+     "y": -6.65,
+     "w": 24.0,
+     "d": 1.3,
+     "t": 12.9
+    }
+   ]
+  },
+  {
+   "name": "Church",
+   "solids": [
+    {
+     "x": 0,
+     "y": 3,
+     "w": 12.6,
+     "d": 22.6,
+     "t": 16.151
+    },
+    {
+     "x": 0,
+     "y": -11,
+     "w": 6.6,
+     "d": 6.6,
+     "t": 35.6
+    }
+   ]
+  }
+ ],
+ "placed": [
+  {
+   "type": "Hangar",
+   "north": 215.0,
+   "east": 175.0,
+   "heading": -90.0
+  },
+  {
+   "type": "Hangar",
+   "north": 285.0,
+   "east": 175.0,
+   "heading": -90.0
+  },
+  {
+   "type": "Terminal",
+   "north": 380.0,
+   "east": 185.0,
+   "heading": -90.0
+  },
+  {
+   "type": "Control tower",
+   "north": 455.0,
+   "east": 165.0,
+   "heading": -90.0
+  },
+  {
+   "type": "Fuel station",
+   "north": 165.0,
+   "east": 110.0,
+   "heading": -90.0
+  },
+  {
+   "type": "Cottage",
+   "north": -650.0,
+   "east": 5653.297,
+   "heading": 77.562
+  },
+  {
+   "type": "House",
+   "north": -630.57,
+   "east": 5659.756,
+   "heading": 77.644
+  },
+  {
+   "type": "House",
+   "north": -613.469,
+   "east": 5664.371,
+   "heading": 77.717
+  },
+  {
+   "type": "Cottage",
+   "north": -592.72,
+   "east": 5666.204,
+   "heading": 77.806
+  },
+  {
+   "type": "Cottage",
+   "north": -575.445,
+   "east": 5672.0,
+   "heading": 77.881
+  },
+  {
+   "type": "House",
+   "north": -559.661,
+   "east": 5674.213,
+   "heading": 77.949
+  },
+  {
+   "type": "House",
+   "north": -541.129,
+   "east": 5675.954,
+   "heading": 78.029
+  },
+  {
+   "type": "House",
+   "north": -520.58,
+   "east": 5681.787,
+   "heading": 78.119
+  },
+  {
+   "type": "House",
+   "north": -498.658,
+   "east": 5688.228,
+   "heading": 78.215
+  },
+  {
+   "type": "House",
+   "north": -479.37,
+   "east": 5692.703,
+   "heading": 78.3
+  },
+  {
+   "type": "House",
+   "north": -464.12,
+   "east": 5694.163,
+   "heading": 78.367
+  },
+  {
+   "type": "House",
+   "north": -442.7,
+   "east": 5697.902,
+   "heading": 78.462
+  },
+  {
+   "type": "House",
+   "north": -424.101,
+   "east": 5703.211,
+   "heading": 78.545
+  },
+  {
+   "type": "House",
+   "north": -409.019,
+   "east": 5706.479,
+   "heading": 78.612
+  },
+  {
+   "type": "Cottage",
+   "north": -389.174,
+   "east": 5710.251,
+   "heading": 78.701
+  },
+  {
+   "type": "House",
+   "north": -375.148,
+   "east": 5710.704,
+   "heading": 78.764
+  },
+  {
+   "type": "House",
+   "north": -359.067,
+   "east": 5713.687,
+   "heading": 78.836
+  },
+  {
+   "type": "House",
+   "north": -340.498,
+   "east": 5717.47,
+   "heading": 78.92
+  },
+  {
+   "type": "House",
+   "north": -321.02,
+   "east": 5724.292,
+   "heading": 79.009
+  },
+  {
+   "type": "Cottage",
+   "north": -302.232,
+   "east": 5726.761,
+   "heading": 79.094
+  },
+  {
+   "type": "Cottage",
+   "north": -282.133,
+   "east": 5730.255,
+   "heading": 79.186
+  },
+  {
+   "type": "House",
+   "north": -267.718,
+   "east": 5733.342,
+   "heading": 79.252
+  },
+  {
+   "type": "Cafe",
+   "north": -250.457,
+   "east": 5739.157,
+   "heading": 79.332
+  },
+  {
+   "type": "Shop",
+   "north": -241.457,
+   "east": 5740.849,
+   "heading": 79.373
+  },
+  {
+   "type": "Townhouse",
+   "north": -232.457,
+   "east": 5742.534,
+   "heading": 79.415
+  },
+  {
+   "type": "Shop",
+   "north": -225.457,
+   "east": 5743.84,
+   "heading": 79.447
+  },
+  {
+   "type": "Townhouse",
+   "north": -216.457,
+   "east": 5745.513,
+   "heading": 79.489
+  },
+  {
+   "type": "Townhouse",
+   "north": -209.457,
+   "east": 5746.81,
+   "heading": 79.522
+  },
+  {
+   "type": "Townhouse",
+   "north": -202.457,
+   "east": 5748.103,
+   "heading": 79.554
+  },
+  {
+   "type": "Townhouse",
+   "north": -195.457,
+   "east": 5749.391,
+   "heading": 79.587
+  },
+  {
+   "type": "Townhouse",
+   "north": -188.457,
+   "east": 5750.675,
+   "heading": 79.619
+  },
+  {
+   "type": "Townhouse",
+   "north": -181.457,
+   "east": 5751.956,
+   "heading": 79.652
+  },
+  {
+   "type": "Townhouse",
+   "north": -174.457,
+   "east": 5753.231,
+   "heading": 79.685
+  },
+  {
+   "type": "Townhouse",
+   "north": -167.457,
+   "east": 5754.503,
+   "heading": 79.717
+  },
+  {
+   "type": "Townhouse",
+   "north": -160.457,
+   "east": 5755.771,
+   "heading": 79.75
+  },
+  {
+   "type": "Townhouse",
+   "north": -153.457,
+   "east": 5757.035,
+   "heading": 79.783
+  },
+  {
+   "type": "Townhouse",
+   "north": -146.457,
+   "east": 5758.295,
+   "heading": 79.816
+  },
+  {
+   "type": "Shop",
+   "north": -139.457,
+   "east": 5759.55,
+   "heading": 79.849
+  },
+  {
+   "type": "Townhouse",
+   "north": -130.457,
+   "east": 5761.158,
+   "heading": 79.891
+  },
+  {
+   "type": "Shop",
+   "north": -123.457,
+   "east": 5762.404,
+   "heading": 79.924
+  },
+  {
+   "type": "Townhouse",
+   "north": -114.457,
+   "east": 5764.0,
+   "heading": 79.967
+  },
+  {
+   "type": "Townhouse",
+   "north": -107.457,
+   "east": 5765.236,
+   "heading": 80.0
+  },
+  {
+   "type": "Townhouse",
+   "north": -100.457,
+   "east": 5766.468,
+   "heading": 80.033
+  },
+  {
+   "type": "Cafe",
+   "north": -93.457,
+   "east": 5767.697,
+   "heading": 80.066
+  },
+  {
+   "type": "Shop",
+   "north": -84.457,
+   "east": 5769.27,
+   "heading": 80.109
+  },
+  {
+   "type": "Townhouse",
+   "north": -75.457,
+   "east": 5770.835,
+   "heading": 80.152
+  },
+  {
+   "type": "Shop",
+   "north": -68.457,
+   "east": 5772.048,
+   "heading": 80.185
+  },
+  {
+   "type": "Shop",
+   "north": -59.457,
+   "east": 5773.602,
+   "heading": 80.228
+  },
+  {
+   "type": "Townhouse",
+   "north": -50.457,
+   "east": 5775.148,
+   "heading": 80.271
+  },
+  {
+   "type": "Townhouse",
+   "north": -43.457,
+   "east": 5776.347,
+   "heading": 80.304
+  },
+  {
+   "type": "Townhouse",
+   "north": 43.543,
+   "east": 5790.885,
+   "heading": 80.723
+  },
+  {
+   "type": "Cafe",
+   "north": 50.543,
+   "east": 5792.026,
+   "heading": 80.757
+  },
+  {
+   "type": "Shop",
+   "north": 59.543,
+   "east": 5793.487,
+   "heading": 80.801
+  },
+  {
+   "type": "Shop",
+   "north": 68.543,
+   "east": 5794.941,
+   "heading": 80.845
+  },
+  {
+   "type": "Shop",
+   "north": 77.543,
+   "east": 5796.388,
+   "heading": 80.889
+  },
+  {
+   "type": "Cafe",
+   "north": 86.543,
+   "east": 5797.828,
+   "heading": 80.932
+  },
+  {
+   "type": "Townhouse",
+   "north": 95.543,
+   "east": 5799.261,
+   "heading": 80.976
+  },
+  {
+   "type": "Townhouse",
+   "north": 102.543,
+   "east": 5800.371,
+   "heading": 81.011
+  },
+  {
+   "type": "Shop",
+   "north": 109.543,
+   "east": 5801.476,
+   "heading": 81.045
+  },
+  {
+   "type": "Townhouse",
+   "north": 118.543,
+   "east": 5802.89,
+   "heading": 81.089
+  },
+  {
+   "type": "Townhouse",
+   "north": 125.543,
+   "east": 5803.986,
+   "heading": 81.123
+  },
+  {
+   "type": "Shop",
+   "north": 132.543,
+   "east": 5805.077,
+   "heading": 81.158
+  },
+  {
+   "type": "Townhouse",
+   "north": 141.543,
+   "east": 5806.473,
+   "heading": 81.202
+  },
+  {
+   "type": "Townhouse",
+   "north": 148.543,
+   "east": 5807.555,
+   "heading": 81.237
+  },
+  {
+   "type": "Townhouse",
+   "north": 155.543,
+   "east": 5808.631,
+   "heading": 81.271
+  },
+  {
+   "type": "Townhouse",
+   "north": 162.543,
+   "east": 5809.704,
+   "heading": 81.306
+  },
+  {
+   "type": "Townhouse",
+   "north": 169.543,
+   "east": 5810.772,
+   "heading": 81.34
+  },
+  {
+   "type": "Townhouse",
+   "north": 176.543,
+   "east": 5811.836,
+   "heading": 81.375
+  },
+  {
+   "type": "Townhouse",
+   "north": 183.543,
+   "east": 5812.896,
+   "heading": 81.409
+  },
+  {
+   "type": "Townhouse",
+   "north": 190.543,
+   "east": 5813.951,
+   "heading": 81.444
+  },
+  {
+   "type": "Cafe",
+   "north": 197.543,
+   "east": 5815.002,
+   "heading": 81.479
+  },
+  {
+   "type": "Shop",
+   "north": 206.543,
+   "east": 5816.347,
+   "heading": 81.524
+  },
+  {
+   "type": "Townhouse",
+   "north": 215.543,
+   "east": 5817.685,
+   "heading": 81.568
+  },
+  {
+   "type": "Cafe",
+   "north": 222.543,
+   "east": 5818.72,
+   "heading": 81.603
+  },
+  {
+   "type": "Shop",
+   "north": 231.543,
+   "east": 5820.045,
+   "heading": 81.648
+  },
+  {
+   "type": "Townhouse",
+   "north": 240.543,
+   "east": 5821.363,
+   "heading": 81.693
+  },
+  {
+   "type": "Cafe",
+   "north": 247.543,
+   "east": 5822.383,
+   "heading": 81.728
+  },
+  {
+   "type": "Townhouse",
+   "north": 256.543,
+   "east": 5823.688,
+   "heading": 81.773
+  },
+  {
+   "type": "House",
+   "north": 263.543,
+   "east": 5820.161,
+   "heading": 81.808
+  },
+  {
+   "type": "House",
+   "north": 283.034,
+   "east": 5824.208,
+   "heading": 81.906
+  },
+  {
+   "type": "Cottage",
+   "north": 300.668,
+   "east": 5828.522,
+   "heading": 81.994
+  },
+  {
+   "type": "House",
+   "north": 314.934,
+   "east": 5827.473,
+   "heading": 82.066
+  },
+  {
+   "type": "Cottage",
+   "north": 333.209,
+   "east": 5832.721,
+   "heading": 82.159
+  },
+  {
+   "type": "House",
+   "north": 352.468,
+   "east": 5836.044,
+   "heading": 82.256
+  },
+  {
+   "type": "Cottage",
+   "north": 370.073,
+   "east": 5838.534,
+   "heading": 82.345
+  },
+  {
+   "type": "House",
+   "north": 390.843,
+   "east": 5838.666,
+   "heading": 82.451
+  },
+  {
+   "type": "House",
+   "north": 408.841,
+   "east": 5840.176,
+   "heading": 82.543
+  },
+  {
+   "type": "House",
+   "north": 426.25,
+   "east": 5843.571,
+   "heading": 82.632
+  },
+  {
+   "type": "Cottage",
+   "north": 446.036,
+   "east": 5846.896,
+   "heading": 82.733
+  },
+  {
+   "type": "House",
+   "north": 465.393,
+   "east": 5847.288,
+   "heading": 82.833
+  },
+  {
+   "type": "House",
+   "north": 481.45,
+   "east": 5852.911,
+   "heading": 82.915
+  },
+  {
+   "type": "Cottage",
+   "north": 501.721,
+   "east": 5852.69,
+   "heading": 83.02
+  },
+  {
+   "type": "Cottage",
+   "north": 516.678,
+   "east": 5854.492,
+   "heading": 83.097
+  },
+  {
+   "type": "House",
+   "north": 530.778,
+   "east": 5856.438,
+   "heading": 83.17
+  },
+  {
+   "type": "Cottage",
+   "north": 551.329,
+   "east": 5858.99,
+   "heading": 83.277
+  },
+  {
+   "type": "House",
+   "north": 566.914,
+   "east": 5862.425,
+   "heading": 83.358
+  },
+  {
+   "type": "House",
+   "north": 584.456,
+   "east": 5863.864,
+   "heading": 83.449
+  },
+  {
+   "type": "House",
+   "north": 606.093,
+   "east": 5865.418,
+   "heading": 83.562
+  },
+  {
+   "type": "House",
+   "north": 623.474,
+   "east": 5865.851,
+   "heading": 83.653
+  },
+  {
+   "type": "House",
+   "north": 641.585,
+   "east": 5867.737,
+   "heading": 83.747
+  },
+  {
+   "type": "Cottage",
+   "north": -650.0,
+   "east": 5689.473,
+   "heading": -102.438
+  },
+  {
+   "type": "House",
+   "north": -630.801,
+   "east": 5692.929,
+   "heading": -102.357
+  },
+  {
+   "type": "Cottage",
+   "north": -612.814,
+   "east": 5695.681,
+   "heading": -102.28
+  },
+  {
+   "type": "Cottage",
+   "north": -592.355,
+   "east": 5698.746,
+   "heading": -102.192
+  },
+  {
+   "type": "House",
+   "north": -575.345,
+   "east": 5706.439,
+   "heading": -102.119
+  },
+  {
+   "type": "House",
+   "north": -558.588,
+   "east": 5709.446,
+   "heading": -102.046
+  },
+  {
+   "type": "House",
+   "north": -538.852,
+   "east": 5712.937,
+   "heading": -101.961
+  },
+  {
+   "type": "Cottage",
+   "north": -517.052,
+   "east": 5715.849,
+   "heading": -101.866
+  },
+  {
+   "type": "Cottage",
+   "north": -500.264,
+   "east": 5718.237,
+   "heading": -101.792
+  },
+  {
+   "type": "House",
+   "north": -484.773,
+   "east": 5725.42,
+   "heading": -101.724
+  },
+  {
+   "type": "House",
+   "north": -463.892,
+   "east": 5728.489,
+   "heading": -101.632
+  },
+  {
+   "type": "House",
+   "north": -445.538,
+   "east": 5732.218,
+   "heading": -101.551
+  },
+  {
+   "type": "House",
+   "north": -425.923,
+   "east": 5737.678,
+   "heading": -101.464
+  },
+  {
+   "type": "House",
+   "north": -407.662,
+   "east": 5740.034,
+   "heading": -101.382
+  },
+  {
+   "type": "House",
+   "north": -388.215,
+   "east": 5741.669,
+   "heading": -101.295
+  },
+  {
+   "type": "House",
+   "north": -370.335,
+   "east": 5748.036,
+   "heading": -101.215
+  },
+  {
+   "type": "Cottage",
+   "north": -349.628,
+   "east": 5749.021,
+   "heading": -101.121
+  },
+  {
+   "type": "Cottage",
+   "north": -329.235,
+   "east": 5755.768,
+   "heading": -101.029
+  },
+  {
+   "type": "Cottage",
+   "north": -309.091,
+   "east": 5760.131,
+   "heading": -100.937
+  },
+  {
+   "type": "House",
+   "north": -294.764,
+   "east": 5759.85,
+   "heading": -100.872
+  },
+  {
+   "type": "House",
+   "north": -279.623,
+   "east": 5763.621,
+   "heading": -100.802
+  },
+  {
+   "type": "House",
+   "north": -263.31,
+   "east": 5767.997,
+   "heading": -100.727
+  },
+  {
+   "type": "Cafe",
+   "north": -248.037,
+   "east": 5767.612,
+   "heading": -100.657
+  },
+  {
+   "type": "Townhouse",
+   "north": -239.037,
+   "east": 5769.302,
+   "heading": -100.615
+  },
+  {
+   "type": "Shop",
+   "north": -232.037,
+   "east": 5770.612,
+   "heading": -100.583
+  },
+  {
+   "type": "Shop",
+   "north": -223.037,
+   "east": 5772.291,
+   "heading": -100.541
+  },
+  {
+   "type": "Shop",
+   "north": -214.037,
+   "east": 5773.962,
+   "heading": -100.5
+  },
+  {
+   "type": "Shop",
+   "north": -205.037,
+   "east": 5775.626,
+   "heading": -100.458
+  },
+  {
+   "type": "Shop",
+   "north": -196.037,
+   "east": 5777.284,
+   "heading": -100.416
+  },
+  {
+   "type": "Shop",
+   "north": -187.037,
+   "east": 5778.935,
+   "heading": -100.374
+  },
+  {
+   "type": "Townhouse",
+   "north": -178.037,
+   "east": 5780.58,
+   "heading": -100.332
+  },
+  {
+   "type": "Cafe",
+   "north": -171.037,
+   "east": 5781.854,
+   "heading": -100.299
+  },
+  {
+   "type": "Townhouse",
+   "north": -162.037,
+   "east": 5783.485,
+   "heading": -100.257
+  },
+  {
+   "type": "Townhouse",
+   "north": -155.037,
+   "east": 5784.75,
+   "heading": -100.224
+  },
+  {
+   "type": "Townhouse",
+   "north": -148.037,
+   "east": 5786.011,
+   "heading": -100.192
+  },
+  {
+   "type": "Townhouse",
+   "north": -141.037,
+   "east": 5787.267,
+   "heading": -100.159
+  },
+  {
+   "type": "Townhouse",
+   "north": -134.037,
+   "east": 5788.519,
+   "heading": -100.126
+  },
+  {
+   "type": "Shop",
+   "north": -127.037,
+   "east": 5789.768,
+   "heading": -100.093
+  },
+  {
+   "type": "Townhouse",
+   "north": -118.037,
+   "east": 5791.366,
+   "heading": -100.05
+  },
+  {
+   "type": "Townhouse",
+   "north": -111.037,
+   "east": 5792.604,
+   "heading": -100.017
+  },
+  {
+   "type": "Cafe",
+   "north": -104.037,
+   "east": 5793.839,
+   "heading": -99.984
+  },
+  {
+   "type": "Townhouse",
+   "north": -95.037,
+   "east": 5795.419,
+   "heading": -99.941
+  },
+  {
+   "type": "Cafe",
+   "north": -88.037,
+   "east": 5796.645,
+   "heading": -99.908
+  },
+  {
+   "type": "Cafe",
+   "north": -79.037,
+   "east": 5798.213,
+   "heading": -99.865
+  },
+  {
+   "type": "Shop",
+   "north": -70.037,
+   "east": 5799.775,
+   "heading": -99.823
+  },
+  {
+   "type": "Townhouse",
+   "north": -61.037,
+   "east": 5801.33,
+   "heading": -99.78
+  },
+  {
+   "type": "Townhouse",
+   "north": -54.037,
+   "east": 5802.534,
+   "heading": -99.746
+  },
+  {
+   "type": "Shop",
+   "north": -47.037,
+   "east": 5803.734,
+   "heading": -99.713
+  },
+  {
+   "type": "Cafe",
+   "north": -38.037,
+   "east": 5805.271,
+   "heading": -99.67
+  },
+  {
+   "type": "Shop",
+   "north": -29.037,
+   "east": 5806.801,
+   "heading": -99.627
+  },
+  {
+   "type": "Townhouse",
+   "north": -20.037,
+   "east": 5808.324,
+   "heading": -99.584
+  },
+  {
+   "type": "Townhouse",
+   "north": -13.037,
+   "east": 5809.504,
+   "heading": -99.55
+  },
+  {
+   "type": "Townhouse",
+   "north": -6.037,
+   "east": 5810.68,
+   "heading": -99.516
+  },
+  {
+   "type": "Townhouse",
+   "north": 0.963,
+   "east": 5811.851,
+   "heading": -99.483
+  },
+  {
+   "type": "Shop",
+   "north": 7.963,
+   "east": 5813.018,
+   "heading": -99.449
+  },
+  {
+   "type": "Shop",
+   "north": 16.963,
+   "east": 5814.513,
+   "heading": -99.405
+  },
+  {
+   "type": "Townhouse",
+   "north": 25.963,
+   "east": 5816.0,
+   "heading": -99.362
+  },
+  {
+   "type": "Townhouse",
+   "north": 32.963,
+   "east": 5817.152,
+   "heading": -99.328
+  },
+  {
+   "type": "Townhouse",
+   "north": 39.963,
+   "east": 5818.299,
+   "heading": -99.294
+  },
+  {
+   "type": "Cafe",
+   "north": 46.963,
+   "east": 5819.443,
+   "heading": -99.26
+  },
+  {
+   "type": "Shop",
+   "north": 55.963,
+   "east": 5820.907,
+   "heading": -99.217
+  },
+  {
+   "type": "Shop",
+   "north": 64.963,
+   "east": 5822.364,
+   "heading": -99.173
+  },
+  {
+   "type": "Cafe",
+   "north": 73.963,
+   "east": 5823.813,
+   "heading": -99.129
+  },
+  {
+   "type": "Townhouse",
+   "north": 82.963,
+   "east": 5825.256,
+   "heading": -99.085
+  },
+  {
+   "type": "Shop",
+   "north": 89.963,
+   "east": 5826.374,
+   "heading": -99.051
+  },
+  {
+   "type": "Shop",
+   "north": 98.963,
+   "east": 5827.803,
+   "heading": -99.007
+  },
+  {
+   "type": "Cafe",
+   "north": 107.963,
+   "east": 5829.227,
+   "heading": -98.963
+  },
+  {
+   "type": "Cafe",
+   "north": 116.963,
+   "east": 5830.643,
+   "heading": -98.919
+  },
+  {
+   "type": "Townhouse",
+   "north": 125.963,
+   "east": 5832.051,
+   "heading": -98.875
+  },
+  {
+   "type": "Townhouse",
+   "north": 132.963,
+   "east": 5833.142,
+   "heading": -98.84
+  },
+  {
+   "type": "Townhouse",
+   "north": 139.963,
+   "east": 5834.229,
+   "heading": -98.806
+  },
+  {
+   "type": "Shop",
+   "north": 146.963,
+   "east": 5835.311,
+   "heading": -98.771
+  },
+  {
+   "type": "Cafe",
+   "north": 155.963,
+   "east": 5836.696,
+   "heading": -98.727
+  },
+  {
+   "type": "Shop",
+   "north": 164.963,
+   "east": 5838.074,
+   "heading": -98.682
+  },
+  {
+   "type": "Shop",
+   "north": 173.963,
+   "east": 5839.445,
+   "heading": -98.638
+  },
+  {
+   "type": "Shop",
+   "north": 182.963,
+   "east": 5840.808,
+   "heading": -98.593
+  },
+  {
+   "type": "Shop",
+   "north": 191.963,
+   "east": 5842.165,
+   "heading": -98.549
+  },
+  {
+   "type": "Townhouse",
+   "north": 200.963,
+   "east": 5843.514,
+   "heading": -98.504
+  },
+  {
+   "type": "Townhouse",
+   "north": 207.963,
+   "east": 5844.559,
+   "heading": -98.469
+  },
+  {
+   "type": "Cafe",
+   "north": 214.963,
+   "east": 5845.599,
+   "heading": -98.435
+  },
+  {
+   "type": "Townhouse",
+   "north": 223.963,
+   "east": 5846.93,
+   "heading": -98.39
+  },
+  {
+   "type": "Townhouse",
+   "north": 230.963,
+   "east": 5847.96,
+   "heading": -98.355
+  },
+  {
+   "type": "Townhouse",
+   "north": 237.963,
+   "east": 5848.986,
+   "heading": -98.32
+  },
+  {
+   "type": "Townhouse",
+   "north": 244.963,
+   "east": 5850.007,
+   "heading": -98.285
+  },
+  {
+   "type": "Cafe",
+   "north": 251.963,
+   "east": 5851.024,
+   "heading": -98.25
+  },
+  {
+   "type": "House",
+   "north": 260.963,
+   "east": 5853.71,
+   "heading": -98.205
+  },
+  {
+   "type": "House",
+   "north": 280.591,
+   "east": 5859.434,
+   "heading": -98.106
+  },
+  {
+   "type": "House",
+   "north": 301.216,
+   "east": 5860.366,
+   "heading": -98.003
+  },
+  {
+   "type": "House",
+   "north": 321.27,
+   "east": 5865.431,
+   "heading": -97.902
+  },
+  {
+   "type": "Cottage",
+   "north": 337.401,
+   "east": 5863.692,
+   "heading": -97.82
+  },
+  {
+   "type": "House",
+   "north": 355.956,
+   "east": 5868.874,
+   "heading": -97.726
+  },
+  {
+   "type": "House",
+   "north": 377.57,
+   "east": 5871.047,
+   "heading": -97.616
+  },
+  {
+   "type": "Cottage",
+   "north": 394.339,
+   "east": 5873.889,
+   "heading": -97.531
+  },
+  {
+   "type": "House",
+   "north": 409.047,
+   "east": 5875.217,
+   "heading": -97.456
+  },
+  {
+   "type": "House",
+   "north": 424.983,
+   "east": 5879.091,
+   "heading": -97.375
+  },
+  {
+   "type": "House",
+   "north": 442.621,
+   "east": 5879.524,
+   "heading": -97.284
+  },
+  {
+   "type": "House",
+   "north": 461.398,
+   "east": 5881.411,
+   "heading": -97.188
+  },
+  {
+   "type": "House",
+   "north": 478.707,
+   "east": 5884.42,
+   "heading": -97.099
+  },
+  {
+   "type": "House",
+   "north": 494.277,
+   "east": 5886.834,
+   "heading": -97.019
+  },
+  {
+   "type": "Cottage",
+   "north": 511.375,
+   "east": 5886.42,
+   "heading": -96.93
+  },
+  {
+   "type": "Cottage",
+   "north": 530.717,
+   "east": 5888.977,
+   "heading": -96.83
+  },
+  {
+   "type": "House",
+   "north": 545.632,
+   "east": 5891.045,
+   "heading": -96.753
+  },
+  {
+   "type": "Cottage",
+   "north": 566.977,
+   "east": 5893.953,
+   "heading": -96.642
+  },
+  {
+   "type": "House",
+   "north": 586.806,
+   "east": 5897.998,
+   "heading": -96.539
+  },
+  {
+   "type": "House",
+   "north": 603.117,
+   "east": 5900.911,
+   "heading": -96.454
+  },
+  {
+   "type": "House",
+   "north": 620.744,
+   "east": 5902.198,
+   "heading": -96.362
+  },
+  {
+   "type": "House",
+   "north": 636.422,
+   "east": 5904.197,
+   "heading": -96.28
+  },
+  {
+   "type": "Church",
+   "north": 0.0,
+   "east": 5767.69,
+   "heading": 90.0
+  },
+  {
+   "type": "Apartments",
+   "north": 170.0,
+   "east": 5872.842,
+   "heading": -90.0
+  },
+  {
+   "type": "Apartments",
+   "north": -150.0,
+   "east": 5721.658,
+   "heading": 90.0
+  },
+  {
+   "type": "House",
+   "north": -395.483,
+   "east": 5688.06,
+   "heading": 180.0
+  },
+  {
+   "type": "House",
+   "north": -362.97,
+   "east": 5688.06,
+   "heading": 0.0
+  },
+  {
+   "type": "Cottage",
+   "north": -396.144,
+   "east": 5667.915,
+   "heading": 180.0
+  },
+  {
+   "type": "Cottage",
+   "north": -365.497,
+   "east": 5667.915,
+   "heading": 0.0
+  },
+  {
+   "type": "House",
+   "north": -396.578,
+   "east": 5647.809,
+   "heading": 180.0
+  },
+  {
+   "type": "Cottage",
+   "north": -362.243,
+   "east": 5647.809,
+   "heading": 0.0
+  },
+  {
+   "type": "House",
+   "north": -395.58,
+   "east": 5623.75,
+   "heading": 180.0
+  },
+  {
+   "type": "House",
+   "north": -362.962,
+   "east": 5623.75,
+   "heading": 0.0
+  },
+  {
+   "type": "House",
+   "north": -395.779,
+   "east": 5600.205,
+   "heading": 180.0
+  },
+  {
+   "type": "Cottage",
+   "north": -365.867,
+   "east": 5600.205,
+   "heading": 0.0
+  },
+  {
+   "type": "Cottage",
+   "north": -395.55,
+   "east": 5576.139,
+   "heading": 180.0
+  },
+  {
+   "type": "House",
+   "north": -364.474,
+   "east": 5576.139,
+   "heading": 0.0
+  },
+  {
+   "type": "House",
+   "north": -365.449,
+   "east": 5552.155,
+   "heading": 0.0
+  },
+  {
+   "type": "Cottage",
+   "north": -362.699,
+   "east": 5528.592,
+   "heading": 0.0
+  },
+  {
+   "type": "House",
+   "north": -394.367,
+   "east": 5504.069,
+   "heading": 180.0
+  },
+  {
+   "type": "Cottage",
+   "north": -395.785,
+   "east": 5484.369,
+   "heading": 180.0
+  },
+  {
+   "type": "Cottage",
+   "north": -365.238,
+   "east": 5484.369,
+   "heading": 0.0
+  },
+  {
+   "type": "House",
+   "north": -394.27,
+   "east": 5459.882,
+   "heading": 180.0
+  },
+  {
+   "type": "House",
+   "north": -365.87,
+   "east": 5459.882,
+   "heading": 0.0
+  },
+  {
+   "type": "Cottage",
+   "north": -395.82,
+   "east": 5438.999,
+   "heading": 180.0
+  },
+  {
+   "type": "House",
+   "north": -362.019,
+   "east": 5438.999,
+   "heading": 0.0
+  },
+  {
+   "type": "House",
+   "north": -365.091,
+   "east": 5414.667,
+   "heading": 0.0
+  },
+  {
+   "type": "Cottage",
+   "north": -396.013,
+   "east": 5394.917,
+   "heading": 180.0
+  },
+  {
+   "type": "House",
+   "north": -362.558,
+   "east": 5394.917,
+   "heading": 0.0
+  },
+  {
+   "type": "House",
+   "north": -396.679,
+   "east": 5373.012,
+   "heading": 180.0
+  },
+  {
+   "type": "House",
+   "north": -364.868,
+   "east": 5373.012,
+   "heading": 0.0
+  },
+  {
+   "type": "Cottage",
+   "north": -396.145,
+   "east": 5350.915,
+   "heading": 180.0
+  },
+  {
+   "type": "House",
+   "north": -362.506,
+   "east": 5350.915,
+   "heading": 0.0
+  },
+  {
+   "type": "House",
+   "north": -394.453,
+   "east": 5330.839,
+   "heading": 180.0
+  },
+  {
+   "type": "House",
+   "north": 385.169,
+   "east": 5817.507,
+   "heading": 180.0
+  },
+  {
+   "type": "House",
+   "north": 415.99,
+   "east": 5817.507,
+   "heading": 0.0
+  },
+  {
+   "type": "House",
+   "north": 383.6,
+   "east": 5793.017,
+   "heading": 180.0
+  },
+  {
+   "type": "House",
+   "north": 414.946,
+   "east": 5793.017,
+   "heading": 0.0
+  },
+  {
+   "type": "House",
+   "north": 417.044,
+   "east": 5771.227,
+   "heading": 0.0
+  },
+  {
+   "type": "House",
+   "north": 383.274,
+   "east": 5747.98,
+   "heading": 180.0
+  },
+  {
+   "type": "Cottage",
+   "north": 414.671,
+   "east": 5747.98,
+   "heading": 0.0
+  },
+  {
+   "type": "House",
+   "north": 382.322,
+   "east": 5724.441,
+   "heading": 180.0
+  },
+  {
+   "type": "House",
+   "north": 417.747,
+   "east": 5724.441,
+   "heading": 0.0
+  },
+  {
+   "type": "House",
+   "north": 385.634,
+   "east": 5704.51,
+   "heading": 180.0
+  },
+  {
+   "type": "House",
+   "north": 382.793,
+   "east": 5682.058,
+   "heading": 180.0
+  },
+  {
+   "type": "House",
+   "north": 416.575,
+   "east": 5682.058,
+   "heading": 0.0
+  },
+  {
+   "type": "House",
+   "north": 383.232,
+   "east": 5657.354,
+   "heading": 180.0
+  },
+  {
+   "type": "Cottage",
+   "north": 415.34,
+   "east": 5657.354,
+   "heading": 0.0
+  },
+  {
+   "type": "House",
+   "north": 382.923,
+   "east": 5634.337,
+   "heading": 180.0
+  },
+  {
+   "type": "Cottage",
+   "north": 416.911,
+   "east": 5634.337,
+   "heading": 0.0
+  },
+  {
+   "type": "Cottage",
+   "north": 416.882,
+   "east": 5615.244,
+   "heading": 0.0
+  },
+  {
+   "type": "Cottage",
+   "north": 385.661,
+   "east": 5593.104,
+   "heading": 180.0
+  },
+  {
+   "type": "Cottage",
+   "north": 417.728,
+   "east": 5593.104,
+   "heading": 0.0
+  },
+  {
+   "type": "Cottage",
+   "north": 383.476,
+   "east": 5573.867,
+   "heading": 180.0
+  },
+  {
+   "type": "House",
+   "north": 416.373,
+   "east": 5573.867,
+   "heading": 0.0
+  },
+  {
+   "type": "House",
+   "north": 382.485,
+   "east": 5553.534,
+   "heading": 180.0
+  },
+  {
+   "type": "House",
+   "north": 417.001,
+   "east": 5553.534,
+   "heading": 0.0
+  },
+  {
+   "type": "Cottage",
+   "north": 382.772,
+   "east": 5530.29,
+   "heading": 180.0
+  },
+  {
+   "type": "House",
+   "north": 417.276,
+   "east": 5530.29,
+   "heading": 0.0
+  },
+  {
+   "type": "Cottage",
+   "north": 384.375,
+   "east": 5507.221,
+   "heading": 180.0
+  },
+  {
+   "type": "House",
+   "north": 416.977,
+   "east": 5507.221,
+   "heading": 0.0
+  },
+  {
+   "type": "Cottage",
+   "north": 382.978,
+   "east": 5485.938,
+   "heading": 180.0
+  },
+  {
+   "type": "House",
+   "north": 417.307,
+   "east": 5485.938,
+   "heading": 0.0
+  },
+  {
+   "type": "Cottage",
+   "north": 382.859,
+   "east": 5464.653,
+   "heading": 180.0
+  },
+  {
+   "type": "House",
+   "north": 414.138,
+   "east": 5464.653,
+   "heading": 0.0
+  },
+  {
+   "type": "House",
+   "north": 416.231,
+   "east": 5443.314,
+   "heading": 0.0
+  }
+ ]
+}

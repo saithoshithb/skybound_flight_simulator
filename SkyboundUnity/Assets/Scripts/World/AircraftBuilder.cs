@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Skybound
 {
@@ -93,7 +95,85 @@ namespace Skybound
         /// <summary>Builds the model under <paramref name="root"/>. Everything made is added to <paramref name="owned"/>.</summary>
         public static AircraftParts Build(AircraftDef def, Transform root, Owned owned)
         {
-            return new AircraftBuilder(def, owned).Aircraft(def, root);
+            var builder = new AircraftBuilder(def, owned);
+            // Aircraft modelled in Blender (Tools/blender) are in Resources/Aircraft; the others are built here.
+            var model = Resources.Load<GameObject>("Aircraft/" + def.name);
+            return model != null ? builder.FromModel(model, root) : builder.Aircraft(def, root);
+        }
+
+        /// <summary>
+        /// Copies a Blender model under <paramref name="root"/> and swaps its materials for the game's, picked by
+        /// material name. The model uses <see cref="Aircraft"/>'s part names, but is at most one level deep (see Tools/blender/aircraft.py).
+        /// </summary>
+        AircraftParts FromModel(GameObject model, Transform root)
+        {
+            // Only the copies made here: on a rebuild the old model is still under root until the end of the frame.
+            var copies = new Dictionary<string, Transform>();
+            var renderers = new List<MeshRenderer>();
+            foreach (Transform child in model.transform)
+            {
+                var copy = UnityEngine.Object.Instantiate(child, root, false);
+                copy.name = child.name;
+                copies[child.name] = copy;
+                renderers.AddRange(copy.GetComponentsInChildren<MeshRenderer>(true));
+            }
+            Transform Find(string path)
+            {
+                var cut = path.IndexOf('/');
+                copies.TryGetValue(cut < 0 ? path : path.Substring(0, cut), out var found);
+                if (found != null && cut >= 0) found = found.Find(path.Substring(cut + 1));
+                return found != null ? found : throw new InvalidOperationException("The aircraft model has no " + path);
+            }
+
+            var materials = new Dictionary<string, Material>
+            {
+                { "Body", bodyShadowed }, { "Stripe", stripe }, { "Accent", accent }, { "Glass", glass }, { "Dark", dark },
+                { "Tire", tire }, { "Metal", metal }, { "Panel", panel }, { "Disc", disc },
+                { "Seat", owned.Add(MaterialKit.Lit("#4a4038", 0.9f)) },
+                { "Prop tip", owned.Add(MaterialKit.Lit("#e3b21b", 0.5f)) },
+                { "Light red", owned.Add(MaterialKit.Basic("#ff3b2f")) },
+                { "Light green", owned.Add(MaterialKit.Basic("#3dff6e")) },
+                { "Light white", owned.Add(MaterialKit.Basic("#ffffff")) },
+                { "Landing light", owned.Add(MaterialKit.Basic("#fffbe8")) },
+                { "Live instruments", owned.Add(MaterialKit.BasicNotToneMapped("#101214")) },
+                { "Radio green", owned.Add(MaterialKit.BasicNotToneMapped("#5fd38a")) },
+                { "Radio amber", owned.Add(MaterialKit.BasicNotToneMapped("#d89a3a")) },
+            };
+            var cockpit = Find("Cockpit");
+            foreach (var renderer in renderers)
+            {
+                var slots = renderer.sharedMaterials;
+                for (var i = 0; i < slots.Length; i++)
+                {
+                    // The importer names them "<model>-<Blender material>".
+                    var name = slots[i].name.Substring(slots[i].name.LastIndexOf('-') + 1);
+                    slots[i] = materials.TryGetValue(name, out var m) ? m
+                        : throw new InvalidOperationException($"{renderer.name}: no game material for '{slots[i].name}'");
+                }
+                renderer.sharedMaterials = slots;
+                // Unlit parts (lights, the propeller disc) and the cockpit cast none, as in Aircraft.
+                var cast = !renderer.transform.IsChildOf(cockpit) && slots[0].shader != disc.shader;
+                renderer.shadowCastingMode = cast ? ShadowCastingMode.On : ShadowCastingMode.Off;
+            }
+
+            var parts = new AircraftParts
+            {
+                elevator = Find("Elevator"),
+                aileronLeft = Find("Aileron left"),
+                aileronRight = Find("Aileron right"),
+                rudder = Find("Rudder"),
+                prop = Find("Propeller"),
+                discMaterial = disc,
+                cockpit = cockpit.gameObject,
+                exterior = Find("Exterior").gameObject,
+                yokeLeft = Find("Cockpit/Yoke left"),
+                yokeRight = Find("Cockpit/Yoke right"),
+                throttleKnob = Find("Cockpit/Throttle"),
+                strobes = new[] { Find("Strobe left").gameObject, Find("Strobe right").gameObject },
+                panelSurface = Find("Cockpit/Live instruments").GetComponent<MeshRenderer>(),
+            };
+            parts.cockpit.SetActive(false);
+            return parts;
         }
 
         GameObject Part(string name, Transform parent, Geo geo, Material material, Vector3 position, Quaternion? rotation = null, Vector3? scale = null, bool castShadow = false)

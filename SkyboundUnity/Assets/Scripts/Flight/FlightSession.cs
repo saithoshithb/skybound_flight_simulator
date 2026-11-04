@@ -60,7 +60,7 @@ namespace Skybound
             var s = SettingsStore.Get();
             activeAircraft = AircraftCatalog.ById(s.aircraftId);
             activeEasyFlight = s.easyFlight;
-            flight = new FlightModel(activeAircraft, TerrainHeight.At);
+            flight = new FlightModel(activeAircraft, Buildings.GroundAt);
             easy.Configure(activeAircraft);
             ResetOnRunway();
         }

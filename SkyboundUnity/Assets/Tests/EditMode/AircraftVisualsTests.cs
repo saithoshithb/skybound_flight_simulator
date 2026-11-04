@@ -56,7 +56,7 @@ public class AircraftVisualsTests
         Build(AircraftCatalog.Trainer);
         var names = root.GetComponentsInChildren<Transform>(true).Select(t => t.name).ToList();
         Assert.That(names, Does.Contain("Cabin"));
-        Assert.That(names.Count(n => n == "Strut"), Is.EqualTo(2));
+        Assert.That(names.Count(n => n.StartsWith("Strut")), Is.EqualTo(2));
         Assert.That(names, Does.Not.Contain("Canopy"));
         Assert.That(root.transform.Find("Wing").localPosition.y, Is.EqualTo(1).Within(1e-5f));
     }
@@ -80,8 +80,9 @@ public class AircraftVisualsTests
         var parts = Build(def);
         Assert.That(parts.prop.localPosition.z, Is.GreaterThan(2)); // Unity +z is forward
         Assert.That(parts.elevator.localPosition.z, Is.LessThan(-5));
+        Assert.That(parts.aileronRight.localPosition.x, Is.GreaterThan(3)); // not mirrored: Unity +x is right
 
-        var wheels = root.GetComponentsInChildren<Transform>(true).Where(t => t.name == "Wheel").ToList();
+        var wheels = root.GetComponentsInChildren<Transform>(true).Where(t => t.name.StartsWith("Wheel")).ToList();
         Assert.That(wheels.Count, Is.EqualTo(3));
         foreach (var leg in def.gear.Take(3)) // the last contact point is the tail, which has no wheel
         {
@@ -89,6 +90,51 @@ public class AircraftVisualsTests
             var found = wheels.Any(w => Mathf.Abs(w.localPosition.z - (float)leg.pos.x) < 1e-4f && Mathf.Abs(w.localPosition.x - (float)leg.pos.y) < 1e-4f);
             Assert.That(found, Is.True, $"no wheel at {leg.pos.x}, {leg.pos.y}");
         }
+    }
+
+    [Test]
+    public void BothAircraftAreTheBlenderModels()
+    {
+        foreach (var def in AircraftCatalog.All)
+        {
+            var parts = Build(def);
+            Assert.That(root.transform.Find("Exterior/Fuselage").GetComponent<MeshFilter>().sharedMesh.vertexCount, Is.GreaterThan(5000), def.name);
+            Assert.That(parts.cockpit.activeSelf, Is.False);
+            // The imported material was swapped for the game's (which draws after the tone-mapping pass).
+            Assert.That(parts.panelSurface.sharedMaterial.renderQueue, Is.EqualTo((int)UnityEngine.Rendering.RenderQueue.Transparent));
+            CleanUp();
+        }
+    }
+
+    [Test]
+    public void TheInstrumentPanelFacesThePilotWhereTheCodeBuiltOneWas()
+    {
+        foreach (var def in AircraftCatalog.All)
+        {
+            var parts = Build(def);
+            var filter = parts.panelSurface.GetComponent<MeshFilter>();
+            var centre = root.transform.InverseTransformPoint(filter.transform.TransformPoint(filter.sharedMesh.bounds.center));
+            // Three.Pos(-0.2, 0.42, -1.02) plus the 0.0265 offset, tilted back 0.2 rad
+            Assert.That(Vector3.Distance(centre, new Vector3(-0.2f, 0.42f, 0.994f)), Is.LessThan(0.02f), $"{def.name}: {centre}");
+            var normal = root.transform.InverseTransformDirection(filter.transform.TransformDirection(filter.sharedMesh.normals[0]));
+            Assert.That(normal.z, Is.LessThan(-0.9f), $"{def.name}: faces {normal}"); // towards the pilot, behind it
+            // The yoke's wheel is drawn at its pivot, not somewhere else in the cabin.
+            var yoke = parts.yokeLeft.GetComponent<MeshFilter>();
+            var wheel = root.transform.InverseTransformPoint(yoke.transform.TransformPoint(yoke.sharedMesh.bounds.center));
+            Assert.That(Vector3.Distance(wheel, parts.yokeLeft.localPosition), Is.LessThan(0.25f), $"{def.name}: yoke drawn at {wheel}");
+            CleanUp();
+        }
+    }
+
+    [Test]
+    public void TheSportsWheelsSitAtItsGearContactPoints()
+    {
+        var def = AircraftCatalog.Sport;
+        var parts = Build(def);
+        Assert.That(parts.aileronRight.localPosition.x, Is.GreaterThan(2));
+        var wheels = root.GetComponentsInChildren<Transform>(true).Where(t => t.name.StartsWith("Wheel")).ToList();
+        foreach (var leg in def.gear.Take(3))
+            Assert.That(wheels.Any(w => Mathf.Abs(w.localPosition.z - (float)leg.pos.x) < 1e-4f && Mathf.Abs(w.localPosition.x - (float)leg.pos.y) < 1e-4f), Is.True, $"no wheel at {leg.pos.x}, {leg.pos.y}");
     }
 
     [Test]

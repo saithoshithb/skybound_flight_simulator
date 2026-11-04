@@ -7,8 +7,8 @@ namespace Skybound
 {
     /// <summary>
     /// Airfield and surroundings. Runway 36/18: 1,200 m × 30 m, threshold of 36 at the origin,
-    /// running north (Unity +z, three.js −z). Everything is procedural so the game needs no
-    /// imported assets. Scenery numbers are the browser game's, in three.js space.
+    /// running north (Unity +z, three.js −z). The terrain's shape and the buildings come from Blender
+    /// (Tools/blender); the rest is procedural. Scenery numbers are the browser game's, in three.js space.
     /// </summary>
     public class WorldBuilder : MonoBehaviour
     {
@@ -69,6 +69,7 @@ namespace Skybound
             Lights();
             Ground(Profile.terrainSegments);
             Runway();
+            BuildBuildings(transform, owned);
             Trees(Profile.trees);
             Hills();
             Clouds(Profile.clouds);
@@ -294,8 +295,9 @@ namespace Skybound
             var slope = Math.Min(1, Math.Sqrt(dn * dn + de * de) / 18);
             var n = Math.Sin(east * 0.0017) * Math.Cos(north * 0.0021) * 0.5 + 0.5; // broad patchiness
             var c = Color.Lerp(Meadow, Wood, (float)Math.Min(1, slope * 1.4 + (h > 25 ? 0.35 : 0) + n * 0.25));
-            if (h > 170) c = Color.Lerp(c, Dry, (float)Math.Min(1, (h - 170) / 90));
-            if (h > 250 || slope > 0.85) c = Color.Lerp(c, Rock, (float)Math.Min(1, Math.Max((h - 250) / 80, (slope - 0.85) / 0.15)));
+            // Treeline and bare rock for the Blender heightmap's mountains (about 1500 m at the top).
+            if (h > 450) c = Color.Lerp(c, Dry, (float)Math.Min(1, (h - 450) / 250));
+            if (h > 800 || slope > 0.85) c = Color.Lerp(c, Rock, (float)Math.Min(1, Math.Max((h - 800) / 300, (slope - 0.85) / 0.15)));
             return c;
         }
 
@@ -450,11 +452,9 @@ namespace Skybound
                 Geo.Plane(k.w, k.l).AppendTo(marks, Matrix4x4.TRS(new Vector3(k.x, 0.06f, k.z), faceUp, Vector3.one));
             Three.Part("Runway marks", transform, owned.Add(marks.ToMesh("Runway marks")), paint, Vector3.zero);
 
-            // Taxiway to the apron and two hangars on the east side
+            // Taxiway to the apron; the hangars and the rest of the airfield are Buildings
             Flat("Taxiway", 60, 15, surface, 45, 0.03f, -260);
             Flat("Apron", 80, 110, owned.Add(MaterialKit.Lit("#6d6f70", 0.95f, 0, true)), 110, 0.03f, -250);
-            Hangar(125, -210, "#a39c8f");
-            Hangar(125, -290, "#8b9196");
 
             // Windsock
             var windsock = Three.Group("Windsock", transform, Three.Pos(-30, 0, -150));
@@ -463,11 +463,54 @@ namespace Skybound
                 owned.Add(MaterialKit.DoubleSided(MaterialKit.Lit("#d26a2c"))), Three.Pos(0, 5.8f, 1.1f), Three.Euler(Mathf.PI / 2 + 0.15f, 0, 0));
         }
 
-        void Hangar(float x, float z, string colour)
+        // ---------- Buildings ----------
+
+        /// <summary>
+        /// The Blender kit (Resources/Buildings/Kit) placed where <see cref="Buildings"/> says, each with its detailed
+        /// model up close and its simple one further out. Materials come from the colour in each material's name.
+        /// </summary>
+        public static void BuildBuildings(Transform parent, Owned owned)
         {
-            var hangar = Three.Group("Hangar", transform, Three.Pos(x, 0, z));
-            Three.Part("Building", hangar, owned.Add(Geo.Box(26, 10, 32).ToMesh("Building")), owned.Add(MaterialKit.Lit(colour, 0.85f, 0, true)), Three.Pos(0, 5, 0), null, null, true);
-            Three.Part("Door", hangar, owned.Add(Geo.Box(0.1, 8, 26).ToMesh("Door")), owned.Add(MaterialKit.Lit("#3a3e42", 0.6f)), Three.Pos(-13.05f, 4, 0));
+            var kit = Resources.Load<GameObject>("Buildings/Kit");
+            if (kit == null) throw new InvalidOperationException("Resources/Buildings/Kit.fbx is missing: export it with Tools/blender/buildings.py");
+            var materials = new Dictionary<string, Material>();
+            foreach (var b in Buildings.All)
+            {
+                var model = kit.transform.Find(b.type);
+                if (model == null) throw new InvalidOperationException("The building kit has no " + b.type);
+                var building = UnityEngine.Object.Instantiate(model, parent, false);
+                building.name = b.type;
+                // x = east, z = north; the heading turns anticlockwise seen from above, Unity's y turns clockwise.
+                building.localPosition = new Vector3((float)b.east, (float)b.ground, (float)b.north);
+                building.localRotation = Quaternion.Euler(0, -(float)b.heading, 0);
+                var lods = new LOD[2];
+                for (var i = 0; i < 2; i++)
+                {
+                    var renderer = building.Find($"{b.type} LOD{i}").GetComponent<MeshRenderer>();
+                    var slots = renderer.sharedMaterials;
+                    for (var s = 0; s < slots.Length; s++) slots[s] = BuildingMaterial(slots[s].name, materials, owned);
+                    renderer.sharedMaterials = slots;
+                    renderer.shadowCastingMode = ShadowCastingMode.On;
+                    // Detail until the building is 2% of the screen high (a house at about 500 m); never culled.
+                    lods[i] = new LOD(i == 0 ? 0.02f : 0, new Renderer[] { renderer });
+                }
+                building.gameObject.AddComponent<LODGroup>().SetLODs(lods);
+            }
+        }
+
+        /// <summary>One shared material per kit material, made from the colour after the # in its name ("Kit-Glass #2a3a48").</summary>
+        static Material BuildingMaterial(string imported, Dictionary<string, Material> made, Owned owned)
+        {
+            var hash = imported.LastIndexOf('#');
+            if (hash < 0) throw new InvalidOperationException($"Building material '{imported}' has no colour in its name");
+            var name = imported.Substring(imported.LastIndexOf('-') + 1);
+            if (made.TryGetValue(name, out var material)) return material;
+            var hex = imported.Substring(hash);
+            material = name.StartsWith("Beacon") ? MaterialKit.Basic(hex)
+                : name.StartsWith("Glass") ? MaterialKit.Lit(hex, 0.15f, 0.5f, true)
+                : name.StartsWith("Metal") || name.StartsWith("Roof metal") ? MaterialKit.Lit(hex, 0.45f, 0.6f, true)
+                : MaterialKit.Lit(hex, 0.85f, 0, true);
+            return made[name] = owned.Add(material);
         }
 
         // ---------- Trees ----------
