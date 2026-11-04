@@ -3,6 +3,7 @@ import { AIRCRAFT, type AircraftDef } from '../flight/aircraft';
 import { stallSpeedKt } from '../flight/dynamics';
 import { cn } from '../lib/utils';
 import { useHubStatus } from '../sensor/hooks';
+import { isUsableStatus } from '../sensor/sensorHub';
 import { useSettings } from '../settings/settingsStore';
 import { useUi } from '../state/uiStore';
 import { Button } from '../ui/primitives';
@@ -81,7 +82,7 @@ export function MenuScreen() {
   const easyFlight = useSettings((s) => s.easyFlight);
   const status = useHubStatus();
   const ui = useUi();
-  const live = status.link === 'live' && status.device === 'ready';
+  const live = isUsableStatus(status);
   const controllerText = !live
     ? 'No controller connected: you can fly with the keyboard'
     : status.transport === 'simulated'

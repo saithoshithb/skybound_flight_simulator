@@ -5,7 +5,7 @@ import { flightLogCsv } from '../flight/recorder';
 import { flash, resetAirborne, resetOnRunway } from '../flight/session';
 import { attachKeyboard } from '../input/keyboard';
 import { useHubStatus } from '../sensor/hooks';
-import { sensorHub } from '../sensor/sensorHub';
+import { isUsableStatus, sensorHub } from '../sensor/sensorHub';
 import { useSettings } from '../settings/settingsStore';
 import { useUi } from '../state/uiStore';
 import { ApproachIcon, CameraIcon, ClipboardIcon, HomeIcon, PlaneIcon, PlayIcon, RecenterIcon, RestartIcon, SettingsIcon } from '../ui/icons';
@@ -78,7 +78,7 @@ function MenuItem({ icon, label, hint, onClick }: { icon: ReactNode; label: stri
 function PauseMenu() {
   const ui = useUi();
   const hub = useHubStatus();
-  const recenterAvailable = hub.link === 'live' && hub.device === 'ready';
+  const recenterAvailable = isUsableStatus(hub);
   const resume = () => ui.setPaused(false);
   const [logCopied, setLogCopied] = useState<string | null>(null);
   const copyLog = async () => {

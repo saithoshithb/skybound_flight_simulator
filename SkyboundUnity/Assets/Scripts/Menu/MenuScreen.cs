@@ -177,7 +177,7 @@ namespace Skybound
             bool Live()
             {
                 var status = hub.GetStatus();
-                return status.link == LinkState.Live && status.device == DeviceState.Ready;
+                return status.Usable;
             }
 
             // Quiet sky-to-ground backdrop

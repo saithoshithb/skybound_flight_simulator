@@ -19,7 +19,7 @@ namespace Skybound
             scope.Text(status, () =>
             {
                 var st = hub.GetStatus();
-                if (st.link != LinkState.Live || st.device != DeviceState.Ready) return "No controller: you can fly with the keyboard";
+                if (!st.Usable) return "No controller: you can fly with the keyboard";
                 if (st.transport == TransportKind.Simulated) return "Simulator connected, not your ESP32 (switch Source to ESP32 · USB)";
                 return SettingsStore.Get().neutral.capturedAt > 0 ? "ESP32 controller ready" : "Set neutral with Recenter before flying";
             });

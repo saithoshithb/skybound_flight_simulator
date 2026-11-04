@@ -130,6 +130,13 @@ describe('SensorHub', () => {
     expect(hub.latest()?.sample.pitch).toBe(5);
   });
 
+  it('still flies after a fallback calibration', () => {
+    t.line('{"t":"status","state":"cal_failed","msg":"no fully still sample"}');
+    t.line(imu(0, 5));
+    expect(hub.getStatus().link).toBe('live');
+    expect(hub.isUsable()).toBe(true);
+  });
+
   it('goes stale then lost when samples stop, and recovers', () => {
     t.line('{"t":"status","state":"ready","msg":""}');
     t.line(imu(0));

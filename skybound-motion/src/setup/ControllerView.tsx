@@ -4,7 +4,7 @@ import { useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { wrap180 } from '../control/mapping';
 import { useHubStatus } from '../sensor/hooks';
-import { sensorHub } from '../sensor/sensorHub';
+import { isUsableStatus, sensorHub } from '../sensor/sensorHub';
 import { getSettings, useSettings } from '../settings/settingsStore';
 
 const D2R = Math.PI / 180;
@@ -115,7 +115,7 @@ function LiveController() {
 export function ControllerView() {
   const status = useHubStatus();
   const hasNeutral = useSettings((s) => s.neutral.capturedAt > 0);
-  const live = status.link === 'live' && status.device === 'ready';
+  const live = isUsableStatus(status);
   const overlay =
     status.link === 'disconnected'
       ? 'Connect a controller or the simulator'

@@ -36,6 +36,9 @@ namespace Skybound
 
         public HubStatus Clone() => (HubStatus)MemberwiseClone();
 
+        /// <summary>Samples can drive controls. A fallback calibration (cal_failed) still streams usable data, with a warning.</summary>
+        public bool Usable => link == LinkState.Live && (device == DeviceState.Ready || device == DeviceState.CalFailed);
+
         public bool SameAs(HubStatus o)
         {
             return link == o.link && device == o.device && deviceMessage == o.deviceMessage && transport == o.transport
@@ -127,7 +130,7 @@ namespace Skybound
         public TimedSample Latest() => last;
 
         /// <summary>True when the newest sample can drive controls.</summary>
-        public bool IsUsable() => status.link == LinkState.Live && status.device == DeviceState.Ready;
+        public bool IsUsable() => status.Usable;
 
         public string[] RecentLines() => log.ToArray();
 

@@ -188,11 +188,7 @@ namespace Skybound
             void Resume() => UiStore.SetPaused(false);
 
             var recenterItem = MenuItem(Icon.Recenter, () => "Recenter controller", "R", app.Link.Recenter, scope);
-            scope.Show(recenterItem, () =>
-            {
-                var hub = app.Link.hub.GetStatus();
-                return hub.link == LinkState.Live && hub.device == DeviceState.Ready;
-            });
+            scope.Show(recenterItem, app.Link.hub.IsUsable);
 
             var resume = Ui.Btn("Resume", Resume, "primary", "lg");
             resume.AddToClassList("pause__resume");

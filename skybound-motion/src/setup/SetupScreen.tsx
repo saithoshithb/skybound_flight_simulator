@@ -1,4 +1,5 @@
 import { useHubStatus } from '../sensor/hooks';
+import { isUsableStatus } from '../sensor/sensorHub';
 import { useSettings } from '../settings/settingsStore';
 import { useUi } from '../state/uiStore';
 import { Button } from '../ui/primitives';
@@ -16,7 +17,7 @@ export function SetupScreen() {
   const status = useHubStatus();
   const setScreen = useUi((s) => s.setScreen);
   const startFlight = useUi((s) => s.startFlight);
-  const live = status.link === 'live' && status.device === 'ready';
+  const live = isUsableStatus(status);
 
   return (
     <div className="mx-auto flex min-h-full max-w-[1480px] flex-col gap-4 px-4 py-4 md:px-6">

@@ -6,10 +6,10 @@ An ESP32 reads an MPU-6050 (GY-521 breakout), works out the controller's pitch, 
 
 | File | Read it for |
 | --- | --- |
-| [HARDWARE.md](HARDWARE.md) | Parts list, wiring, mounting, flashing the firmware, Windows drivers, what the firmware does, known limitations |
+| [HARDWARE.md](../skybound-motion/docs/HARDWARE.md) | Parts list, wiring, mounting, flashing the firmware, Windows drivers, what the firmware does, known limitations |
 | [USING-THE-CONTROLLER.md](USING-THE-CONTROLLER.md) | Connecting in the browser, calibration and recentering, response settings, troubleshooting |
-| [AXES.md](AXES.md) | Which way is positive pitch, roll and yaw, from the chip to the game |
-| [PROTOCOL.md](PROTOCOL.md) | The NDJSON messages the board sends, the commands it accepts, link-health rules |
+| [AXES.md](../skybound-motion/docs/AXES.md) | Which way is positive pitch, roll and yaw, from the chip to the game |
+| [PROTOCOL.md](../skybound-motion/docs/PROTOCOL.md) | The NDJSON messages the board sends, the commands it accepts, link-health rules |
 | [TEST-RESULTS.md](TEST-RESULTS.md) | What was measured on the real hardware, and what still hasn't been verified |
 
 ## Quick reference

@@ -28,6 +28,11 @@ export interface HubStatus {
   lastError: string | null;
 }
 
+/** Samples can drive controls. A fallback calibration (cal_failed) still streams usable data, with a warning. */
+export function isUsableStatus(s: HubStatus): boolean {
+  return s.link === 'live' && (s.device === 'ready' || s.device === 'cal_failed');
+}
+
 /** Diagnostics counters, read by polling. */
 export interface HubStats {
   rxHz: number;
@@ -103,7 +108,7 @@ export class SensorHub {
 
   /** True when the newest sample can drive controls. */
   isUsable(): boolean {
-    return this.status.link === 'live' && this.status.device === 'ready';
+    return isUsableStatus(this.status);
   }
 
   recentLines(): readonly string[] {

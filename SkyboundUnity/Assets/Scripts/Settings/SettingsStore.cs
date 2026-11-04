@@ -78,6 +78,7 @@ namespace Skybound
             try
             {
                 if (File.Exists(FilePath)) JsonUtility.FromJsonOverwrite(File.ReadAllText(FilePath), loaded);
+                FitToRanges(loaded.control);
             }
             catch (Exception e)
             {
@@ -113,13 +114,39 @@ namespace Skybound
             if (!persist) return;
             try
             {
-                File.WriteAllText(FilePath, JsonUtility.ToJson(Get(), true));
+                WriteSafely(FilePath, JsonUtility.ToJson(Get(), true));
             }
             catch (Exception e)
             {
                 Debug.LogWarning("[Skybound] Settings not saved: " + e.Message);
             }
         }
+
+        /// <summary>Writes beside the file, then swaps it in, so a crash mid-save leaves the old file whole.</summary>
+        public static void WriteSafely(string path, string text)
+        {
+            var temp = path + ".tmp";
+            File.WriteAllText(temp, text);
+            if (File.Exists(path)) File.Replace(temp, path, null);
+            else File.Move(temp, path);
+        }
+
+        /// <summary>A hand-edited file can hold values the sliders never allow: a 0° max angle divides by zero.</summary>
+        public static void FitToRanges(ControlSettings c)
+        {
+            var d = new ControlSettings();
+            foreach (var (axis, def) in new[] { (c.pitch, d.pitch), (c.roll, d.roll), (c.yaw, d.yaw) })
+                axis.maxAngleDeg = Fit(axis.maxAngleDeg, 10, 70, def.maxAngleDeg);
+            c.yawFullRateDps = Fit(c.yawFullRateDps, 20, 300, d.yawFullRateDps);
+            c.yawWashoutS = Fit(c.yawWashoutS, 0.5, 10, d.yawWashoutS);
+            c.sensitivity = Fit(c.sensitivity, 0.3, 2, d.sensitivity);
+            c.deadzone = Fit(c.deadzone, 0, 0.3, d.deadzone);
+            c.expo = Fit(c.expo, 0, 1, d.expo);
+            c.smoothingMs = Fit(c.smoothingMs, 0, 250, d.smoothingMs);
+            c.slewPerSec = Fit(c.slewPerSec, 1, 12, d.slewPerSec);
+        }
+
+        static double Fit(double v, double min, double max, double fallback) => double.IsNaN(v) ? fallback : Math.Min(max, Math.Max(min, v));
 
         public static void SetAircraftId(string id) { Get().aircraftId = id; Changed(); }
         public static void SetGraphics(GraphicsQuality q) { Get().graphics = q; Changed(); }

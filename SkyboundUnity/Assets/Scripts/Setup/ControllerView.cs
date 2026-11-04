@@ -148,7 +148,7 @@ namespace Skybound
 
         static string OverlayText(HubStatus status)
         {
-            if (status.link == LinkState.Live && status.device == DeviceState.Ready) return null;
+            if (status.Usable) return null;
             if (status.link == LinkState.Disconnected) return "Connect a controller or the simulator";
             if (status.device == DeviceState.Calibrating) return "Device is calibrating — keep it still";
             if (status.link == LinkState.Awaiting || status.link == LinkState.Connecting) return "Waiting for sensor data…";

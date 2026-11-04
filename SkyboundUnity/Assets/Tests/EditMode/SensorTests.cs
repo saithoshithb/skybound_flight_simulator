@@ -172,6 +172,16 @@ public class SensorTests
     }
 
     [Test]
+    public void AFallbackCalibrationStillFlies()
+    {
+        t.Line("{\"t\":\"status\",\"state\":\"cal_failed\",\"msg\":\"no fully still sample\"}");
+        t.Line(Imu(0, 5));
+        Assert.That(hub.GetStatus().link, Is.EqualTo(LinkState.Live));
+        Assert.That(hub.IsUsable(), Is.True);
+        Assert.That(hub.GetStatus().Usable, Is.True);
+    }
+
+    [Test]
     public void GoesStaleThenLostWhenSamplesStopAndRecovers()
     {
         t.Line("{\"t\":\"status\",\"state\":\"ready\",\"msg\":\"\"}");

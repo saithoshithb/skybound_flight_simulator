@@ -9,7 +9,7 @@
 
 ## First connection
 
-1. Wire and flash the board: [HARDWARE.md](HARDWARE.md).
+1. Wire and flash the board: [HARDWARE.md](../skybound-motion/docs/HARDWARE.md).
 2. Put the controller on a still surface. In **Controller setup**, choose **ESP32 · USB**, click **Connect**, and pick the board's COM port.
 3. Opening the port resets most ESP32 boards, which then calibrate the gyro for about 2 s. Keep the controller still. The setup screen says when data is live.
 4. Hold the controller in your comfortable hands-off pose and click **Recenter** (or press **R**). This captures neutral pitch and roll over 1 s, and is rejected if you move.
@@ -47,7 +47,7 @@ With **Easy flight** on (the default), tilt sideways to bank and turn (up to 35�
 
 | Symptom | Likely cause and fix |
 | --- | --- |
-| No COM port appears | A charge-only USB cable, or a missing CP210x/CH340 driver (see [HARDWARE.md](HARDWARE.md)). |
+| No COM port appears | A charge-only USB cable, or a missing CP210x/CH340 driver (see [HARDWARE.md](../skybound-motion/docs/HARDWARE.md)). |
 | Port picker never opens | The browser has no Web Serial (Firefox, Safari, or an embedded browser pane). Use Chrome or Edge. |
 | The port won't open | Another program has it: close Arduino Serial Monitor or `verify-device.ps1`. |
 | Plane turns or climbs by itself | Check the source shown in the HUD and setup screen says **ESP32 · USB**, not **Simulated**. Then recenter (**R**) while holding your normal pose. |

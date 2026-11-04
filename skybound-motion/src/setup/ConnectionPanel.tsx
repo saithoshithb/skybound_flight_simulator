@@ -3,7 +3,7 @@ import { captureNeutral, ZERO_NEUTRAL } from '../calibration/neutral';
 import { pipeline } from '../control/controlLoop';
 import { cn } from '../lib/utils';
 import { useHubStatus } from '../sensor/hooks';
-import { sensorHub, type LinkState } from '../sensor/sensorHub';
+import { isUsableStatus, sensorHub, type LinkState } from '../sensor/sensorHub';
 import { canReconnect, connect, disconnect, reconnect } from '../sensor/serialSession';
 import { serialSupport } from '../sensor/transport/webSerial';
 import { useSettings } from '../settings/settingsStore';
@@ -53,7 +53,7 @@ export function ConnectionPanel() {
   const [note, setNote] = useState<{ tone: 'ok' | 'bad'; text: string } | null>(null);
   const support = serialSupport();
   const connected = status.link !== 'disconnected' && status.link !== 'connecting';
-  const usable = status.link === 'live' && status.device === 'ready';
+  const usable = isUsableStatus(status);
 
   const run = async (kind: Busy, fn: () => Promise<void>) => {
     setBusy(kind);
